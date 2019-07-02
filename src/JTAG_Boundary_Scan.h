@@ -1,0 +1,5 @@
+#ifndef _JTAG_BOUNDARY_SCAN_H
+#define _JTAG_BOUNDARY_SCAN_H
+
+
+#endif // _JTAG_BOUNDARY_SCAN_H
