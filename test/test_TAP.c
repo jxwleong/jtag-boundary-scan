@@ -116,6 +116,7 @@ void verifyTapSequence(TapSequence tapSeq[]){
   state, TAP state machine only travel at rising edge so
   TMS must be set before the rising edge*/
 
+/*
 void test_tapTestLogicReset_given_extra_seq_on_entry_5_expect_error_msg(void){
 
 
@@ -123,14 +124,14 @@ void test_tapTestLogicReset_given_extra_seq_on_entry_5_expect_error_msg(void){
     jtagState.state = TEST_LOGIC_RESET;
 
     TapSequence tapSeq[] = {
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {END, 0, 0, 0}};
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {END, 0, 0, 1}};
 
     setupFakeTapSeq(tapSeq);
     tapTestLogicReset();
@@ -147,13 +148,13 @@ void test_tapTestLogicReset_given_correct_seq_expect_TAP_LOGIC_RESET_state(void)
     jtagState.state = TEST_LOGIC_RESET;
 
     TapSequence tapSeq[] = {
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {END, 0, 0, 0}};
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {END, 0, 0, 1}};
 
     setupFakeTapSeq(tapSeq);
     tapTestLogicReset();
@@ -170,13 +171,13 @@ void test_tapTestLogicReset_given_wrong_TAP_seq_start_from_SELECT_DR_SCAN_expect
     jtagState.state = SELECT_DR_SCAN;
 
     TapSequence tapSeq[] = {
-    {SELECT_DR_SCAN, 0, 0, 0},
-    {UPDATE_DR, 0, 0, 0},     // expect SELECT_IR_SCAN
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
-    {END, 0, 0, 0}};
+    {SELECT_DR_SCAN, 0, 0, 1},
+    {UPDATE_DR, 0, 0, 1},     // expect SELECT_IR_SCAN
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
+    {END, 0, 0, 1}};
 
     setupFakeTapSeq(tapSeq);
     tapTestLogicReset();
@@ -192,12 +193,12 @@ void test_tapTestLogicReset_given_correct_seq_start_from_CAPTURE_DR_expect_TAP_L
     jtagState.state = CAPTURE_DR;
 
     TapSequence tapSeq[] = {
-    {CAPTURE_DR, 0, 0, 0},
-    {EXIT1_DR, 0, 0, 0},
-    {UPDATE_DR, 0, 0, 0},
-    {SELECT_DR_SCAN, 0, 0, 0},
-    {SELECT_IR_SCAN, 0, 0, 0},
-    {TEST_LOGIC_RESET, 0, 0, 0},
+    {CAPTURE_DR, 0, 0, 1},
+    {EXIT1_DR, 0, 0, 1},
+    {UPDATE_DR, 0, 0, 1},
+    {SELECT_DR_SCAN, 0, 0, 1},
+    {SELECT_IR_SCAN, 0, 0, 1},
+    {TEST_LOGIC_RESET, 0, 0, 1},
     {END, 0, 0, 0}};
 
     setupFakeTapSeq(tapSeq);
@@ -244,9 +245,9 @@ void test_jtagGoTo_from_TEST_LOGIC_RESET_to_RUN_TEST_IDLE_expect_correct(void){
   jtagState.state = TEST_LOGIC_RESET;
 
   TapSequence tapSeq[] = {
-  {TEST_LOGIC_RESET, 0, 0, 0},
-  {RUN_TEST_IDLE, 0, 0, 0},
-  {END, 0, 0, 0}};
+  {TEST_LOGIC_RESET, 0, 0, 1},
+  {RUN_TEST_IDLE, 0, 0, 1},
+  {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
   jtagGoTo(jtagState, RUN_TEST_IDLE);
@@ -262,13 +263,13 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_expect_correct(void){
   //Tms
   // 0-1-1-0-0
   TapSequence tapSeq[] = {
-  {TEST_LOGIC_RESET, 0, 0, 0},
-  {RUN_TEST_IDLE, 0, 0, 0},
-  {SELECT_DR_SCAN, 0, 0, 0},
-  {SELECT_IR_SCAN, 0, 0, 0},
-  {CAPTURE_IR, 0, 0, 0},
-  {SHIFT_IR, 0, 0, 0},
-  {END, 0, 0, 0}};
+  {TEST_LOGIC_RESET, 0, 0, 1},
+  {RUN_TEST_IDLE, 0, 0, 1},
+  {SELECT_DR_SCAN, 0, 0, 1},
+  {SELECT_IR_SCAN, 0, 0, 1},
+  {CAPTURE_IR, 0, 0, 1},
+  {SHIFT_IR, 0, 0, 1},
+  {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
   jtagGoTo(jtagState, SHIFT_IR);
@@ -277,20 +278,89 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_expect_correct(void){
   verifyTapSequence(tapSeq);
 }
 
+void test_jtagGoTo_given_EXIT2_DR_to_SHIFT_DR_expect_correct(void){
+  jtagState.state = EXIT2_DR;
 
-void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_expect_error_message(void){
+  // tms
+  // 0-1-0-..
+  TapSequence tapSeq[] = {
+  {EXIT2_DR, 0, 0, 1},
+  {SHIFT_DR, 0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  jtagGoTo(jtagState, SHIFT_DR);
+
+  TEST_ASSERT_EQUAL(SHIFT_DR, jtagState.state);
+  verifyTapSequence(tapSeq);
+}
+
+void test_jtagGoTo_given_CAPTURE_DR_to_UPDARE_DR_expect_correct(void){
+  jtagState.state = CAPTURE_DR;
+
+  // tms
+  // 0-1-0-..
+  TapSequence tapSeq[] = {
+  {CAPTURE_DR, 0, 0, 1},
+  {EXIT1_DR, 0, 0, 1},
+  {UPDATE_DR, 0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  jtagGoTo(jtagState, UPDATE_DR);
+
+  TEST_ASSERT_EQUAL(UPDATE_DR, jtagState.state);
+  verifyTapSequence(tapSeq);
+}
+
+void test_jtagGoTo_given_EXIT2_IR_to_SHIFT_IR_expect_correct(void){
+  jtagState.state = EXIT2_IR;
+
+  // tms
+  // 0-1-0-..
+  TapSequence tapSeq[] = {
+  {EXIT2_IR, 0, 0, 1},
+  {SHIFT_IR, 0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  jtagGoTo(jtagState, SHIFT_IR);
+
+  TEST_ASSERT_EQUAL(SHIFT_IR, jtagState.state);
+  verifyTapSequence(tapSeq);
+}
+
+void test_jtagGoTo_given_CAPTURE_IR_to_UPDARE_IR_expect_correct(void){
+  jtagState.state = CAPTURE_IR;
+
+  // tms
+  // 0-1-0-..
+  TapSequence tapSeq[] = {
+  {CAPTURE_IR, 0, 0, 1},
+  {EXIT1_IR, 0, 0, 1},
+  {UPDATE_IR, 0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  jtagGoTo(jtagState, UPDATE_IR);
+
+  TEST_ASSERT_EQUAL(UPDATE_IR, jtagState.state);
+  verifyTapSequence(tapSeq);
+}
+*/
+void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_message(void){
   jtagState.state = TEST_LOGIC_RESET;
 
   // tms
   // 0-1-0-..
   TapSequence tapSeq[] = {
-  {TEST_LOGIC_RESET, 0, 0, 0},
-  {RUN_TEST_IDLE, 0, 0, 0},
-  {SELECT_DR_SCAN, 0, 0, 0},
-  {CAPTURE_DR, 0, 0, 0},
-  {CAPTURE_IR, 0, 0, 0},
-  {SHIFT_IR, 0, 0, 0},
-  {END, 0, 0, 0}};
+  {TEST_LOGIC_RESET, 0, 0, 1},
+  {RUN_TEST_IDLE, 0, 0, 1},
+  {SELECT_DR_SCAN, 0, 0, 1},
+  {CAPTURE_DR, 0, 0, 1}, // expect SELECT_IR_SCAN
+  {CAPTURE_IR, 0, 0, 1},
+  {SHIFT_IR, 0, 0, 1},
+  {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
   jtagGoTo(jtagState, SHIFT_IR);
