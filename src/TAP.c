@@ -5,7 +5,6 @@
 #include "UnityErrorHandler.h"
 #include "global.h"
 
-//JtagState jtagState;  // must define else linker cant link
 
 /*  @desc    return the name of TAP state in string instead of number(enum)
     @retval  TAP state in string
@@ -81,4 +80,20 @@ void tapWriteBits(uint64_t data, int length){
   oneBitData = dataMask & data;
   tapStep(1, oneBitData);
   jtagState.inData |= oneBitData << (1*i);
+}
+
+
+/*  @param the length of read
+    @desc  get the data from the BoundaryScanCell
+*/
+int tapReadBits(int length){
+  int data;
+  int i;
+
+  while(length !=0){
+    data |= (jtagState.outData & 1) << i;
+    length--;
+    i++;
+  }
+  return data;
 }

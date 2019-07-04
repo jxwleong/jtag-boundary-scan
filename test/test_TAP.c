@@ -8,7 +8,7 @@
 #include "CExceptionConfig.h"
 #include "CException.h"
 #include "Exception.h"
-
+#include "error.h"
 
 JtagState jtagState = {TEST_LOGIC_RESET, 0, 0};
 
@@ -77,8 +77,6 @@ int jtagStateMachineTester(int tms, int tdi){
         unityError("On entry %i, expected tms is %i but received %i",
         tapSeqIndex+1, seqTms, tms);
       }
-
-
     }
 }
 
@@ -402,7 +400,7 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_mes
 }
 
 
-*/
+
 void test_jtagGoTo_given_TEST_LOGIC_RESET_to_TEST_LOGIC_RESET_wrong_seq_expect_error_thrown(void){
 
   CEXCEPTION_T e;
@@ -425,11 +423,12 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_TEST_LOGIC_RESET_wrong_seq_expect_e
   }
   Catch(e){
     TEST_FAIL_MESSAGE(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_SAME_TAP_STATE, e->errorCode);
   }
   verifyTapSequence(tapSeq);
 }
 
-/*
+
 void test_tapWriteBits_given_0xf1_expect_correct(void){
   jtagState.state = SHIFT_DR;
   jtagState.inData = 0;
@@ -467,3 +466,21 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
   verifyTapSequence(tapSeq);
 }
 */
+
+void test_tapReadBits_given_0xff_expect_read_0xff(void){
+  int data = 0;
+  jtagState.state = SHIFT_DR;
+  jtagState.inData = 0;
+  jtagState.outData = 0xff;
+
+  TapSequence tapSeq[] = {
+  {SHIFT_DR, 0, 0, 1},    //First cycle data does not inputted
+  {SHIFT_DR, 0b1111111, 0, 7}, // tdi = 1111 1111
+  {EXIT1_DR, 0b1, 0, 1},
+  {END, 0, 0, 1}};
+
+  //setupFakeTapSeq(tapSeq);
+  data = tapReadBits(8);
+  TEST_ASSERT_EQUAL(255, data);
+//  verifyTapSequence(tapSeq);
+}

@@ -54,5 +54,6 @@ struct TapTestTable{
 void tapTestLogicReset();
 char *getTapStateName(TapState tapState);
 void tapWriteBits(uint64_t data, int length);
+int tapReadBits(int length);
 
 #endif // _TAP_FUNC_H
