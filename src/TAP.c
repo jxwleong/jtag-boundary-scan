@@ -5,7 +5,7 @@
 #include "UnityErrorHandler.h"
 #include "global.h"
 
-JtagState jtagState;  // must define else linker cant link
+//JtagState jtagState;  // must define else linker cant link
 
 /*  @desc    return the name of TAP state in string instead of number(enum)
     @retval  TAP state in string
@@ -60,8 +60,14 @@ void tapTestLogicReset(){
 }
 
 
+/*  @param the data desired to write and the length of the data
+    @desc  write the data into Data Register or Instruction Register
+           based on the TAP state (SHIFT_DR or SHIFT_IR)
+*/
+void tapWriteBits(uint64_t data, int length){
 
+}
 
 /*  @desc  shifft the input data from tdi into JTAG devices, meanwhile
 */
-//void tapShiftBit(TckState tck, TdiState tdi){}
+//void tapShiftBits(TckState tck, TdiState tdi){}

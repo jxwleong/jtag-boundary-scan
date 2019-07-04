@@ -1,5 +1,6 @@
 #include "TAP_LookUpTable.h"
 #include "UnityErrorHandler.h"
+#include "global.h"
 
 StateTable stateMachineLookUpTable[16][16] = {
   // current state is TEST_LOGIC_RESET

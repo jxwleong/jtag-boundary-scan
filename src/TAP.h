@@ -2,8 +2,6 @@
 #define _TAP_H
 
 #include <stdint.h>
-//#include "global.h"
-
 
 /*defination for TAP state machine*/
 typedef enum{
@@ -27,6 +25,12 @@ typedef enum{
   END = 17,
 }TapState;
 
+typedef struct JtagState JtagState;
+struct JtagState{
+  TapState state;
+  uint64_t inData;
+  uint64_t outData;
+};
 
 
 typedef struct TapSequence TapSequence;
@@ -48,15 +52,6 @@ struct TapTestTable{
 
 
 void tapTestLogicReset();
-//void tracknUpdateTapStateMachine(TapStateSequence *stateSequence);
-//void tapGoToFrom(TapState start, TapState end, TapStateSequence *stateSequence);
-//void tapShiftBit(TckState tck, TdiState tdi);
-//void jtagStateMachineTester(TapSequence tapSeq[], int lengthOfSeq);
-int  tapStep(int tms, int tdi);
-TapState trackTapState(TapState currentState, int tms);
-void compareTapStates(TapState actualState, TapState expectedState);
-
 char *getTapStateName(TapState tapState);
-/*  @desc  return the name of TMS state in string instead of number(enum)*/
-//TapState getCurrentState(JtagState currentState);
+
 #endif // _TAP_FUNC_H

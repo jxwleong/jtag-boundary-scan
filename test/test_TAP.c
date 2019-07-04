@@ -2,13 +2,12 @@
 #include <stdio.h>
 #include "cmock.h"  // include this header will cause multiple definition of stateMachineLookUpTable
 #include "TAP.h"
-#include "global.h"
 #include "mock_TAP_Mock.h"
 #include "TAP_LookUpTable.h"
 #include "UnityErrorHandler.h"
 
 
-JtagState jtagState = {TEST_LOGIC_RESET};
+JtagState jtagState = {TEST_LOGIC_RESET, 0, 0};
 
 TapTestTable tapTable[16] = {{TEST_LOGIC_RESET, RUN_TEST_IDLE, TEST_LOGIC_RESET},
                              {RUN_TEST_IDLE, RUN_TEST_IDLE, SELECT_DR_SCAN},
@@ -122,6 +121,8 @@ void test_tapTestLogicReset_given_extra_seq_on_entry_5_expect_error_msg(void){
 
     // Initialize current state of TAP
     jtagState.state = TEST_LOGIC_RESET;
+    jtagState.inData = 0;
+    jtagState.outData = 0;
 
     TapSequence tapSeq[] = {
     {TEST_LOGIC_RESET, 0, 0, 1},
@@ -146,6 +147,8 @@ void test_tapTestLogicReset_given_correct_seq_expect_TAP_LOGIC_RESET_state(void)
 
     // Initialize current state of TAP and endState
     jtagState.state = TEST_LOGIC_RESET;
+    jtagState.inData = 0;
+    jtagState.outData = 0;
 
     TapSequence tapSeq[] = {
     {TEST_LOGIC_RESET, 0, 0, 1},
@@ -169,6 +172,8 @@ void test_tapTestLogicReset_given_wrong_TAP_seq_start_from_SELECT_DR_SCAN_expect
 
     // Initialize current state of TAP and endState
     jtagState.state = SELECT_DR_SCAN;
+    jtagState.inData = 0;
+    jtagState.outData = 0;
 
     TapSequence tapSeq[] = {
     {SELECT_DR_SCAN, 0, 0, 1},
@@ -191,6 +196,8 @@ void test_tapTestLogicReset_given_correct_seq_start_from_CAPTURE_DR_expect_TAP_L
 
     // Initialize current state of TAP and endState
     jtagState.state = CAPTURE_DR;
+    jtagState.inData = 0;
+    jtagState.outData = 0;
 
     TapSequence tapSeq[] = {
     {CAPTURE_DR, 0, 0, 1},
@@ -243,6 +250,8 @@ void test_jtagGoTo_from_TEST_LOGIC_RESET_to_RUN_TEST_IDLE_expect_correct(void){
 
   // Initialize current state of TAP and endState
   jtagState.state = TEST_LOGIC_RESET;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   TapSequence tapSeq[] = {
   {TEST_LOGIC_RESET, 0, 0, 1},
@@ -259,6 +268,8 @@ void test_jtagGoTo_from_TEST_LOGIC_RESET_to_RUN_TEST_IDLE_expect_correct(void){
 void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_expect_correct(void){
   // Initialize current state of TAP and endState
   jtagState.state = TEST_LOGIC_RESET;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   //Tms
   // 0-1-1-0-0
@@ -280,6 +291,8 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_expect_correct(void){
 
 void test_jtagGoTo_given_EXIT2_DR_to_SHIFT_DR_expect_correct(void){
   jtagState.state = EXIT2_DR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   // tms
   // 0-1-0-..
@@ -297,6 +310,8 @@ void test_jtagGoTo_given_EXIT2_DR_to_SHIFT_DR_expect_correct(void){
 
 void test_jtagGoTo_given_CAPTURE_DR_to_UPDARE_DR_expect_correct(void){
   jtagState.state = CAPTURE_DR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   // tms
   // 0-1-0-..
@@ -315,6 +330,8 @@ void test_jtagGoTo_given_CAPTURE_DR_to_UPDARE_DR_expect_correct(void){
 
 void test_jtagGoTo_given_EXIT2_IR_to_SHIFT_IR_expect_correct(void){
   jtagState.state = EXIT2_IR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   // tms
   // 0-1-0-..
@@ -332,6 +349,8 @@ void test_jtagGoTo_given_EXIT2_IR_to_SHIFT_IR_expect_correct(void){
 
 void test_jtagGoTo_given_CAPTURE_IR_to_UPDARE_IR_expect_correct(void){
   jtagState.state = CAPTURE_IR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   // tms
   // 0-1-0-..
@@ -350,6 +369,8 @@ void test_jtagGoTo_given_CAPTURE_IR_to_UPDARE_IR_expect_correct(void){
 */
 void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_message(void){
   jtagState.state = TEST_LOGIC_RESET;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
 
   // tms
   // 0-1-0-..
