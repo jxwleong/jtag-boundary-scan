@@ -65,9 +65,20 @@ void tapTestLogicReset(){
            based on the TAP state (SHIFT_DR or SHIFT_IR)
 */
 void tapWriteBits(uint64_t data, int length){
+  int dataMask = 1;
+  int oneBitData = 0;
+  int i = 0;
 
+  // noted that last bit of data must be set at next tap state
+  while(length > 1){
+    oneBitData = dataMask & data;
+    tapStep(0, oneBitData); 
+    jtagState.inData |= oneBitData << (1*i);
+    length--;
+    data = data >> 1;
+    i++;
+  }
+  oneBitData = dataMask & data;
+  tapStep(1, oneBitData);
+  jtagState.inData |= oneBitData << (1*i);
 }
-
-/*  @desc  shifft the input data from tdi into JTAG devices, meanwhile
-*/
-//void tapShiftBits(TckState tck, TdiState tdi){}

@@ -54,19 +54,28 @@ int jtagStateMachineTester(int tms, int tdi){
   TapState scriptState = (tapSeqPtr[tapSeqIndex+1].state);
 
     if(scriptState != END){
-      if(tms == seqTms){
-        if(tdi == seqTdi){
-          verifyTapState();
-          tapSeqIndex++;
-        }
-        else
-          unityError("On entry %i, expected tdi is %i but received %i",
-          tapSeqIndex, seqTdi, tdi);
-      }
+        if(tms == seqTms){
+          if(tdi == (seqTdi&1)){
+            if((tapSeqPtr[tapSeqIndex+1].bits)>1){
+              (tapSeqPtr[tapSeqIndex+1].bits)--;
+              (tapSeqPtr[tapSeqIndex+1].tdi)>>=1;
+            }
+            else{
+              verifyTapState();
+              tapSeqIndex++;
+            }
+          }
+          else
+            unityError("On entry %i, expected tdi is %i but received %i",
+            tapSeqIndex+1, (seqTdi&1), tdi);
+          }
+
       else{
         unityError("On entry %i, expected tms is %i but received %i",
-        tapSeqIndex, seqTms, tms);
+        tapSeqIndex+1, seqTms, tms);
       }
+
+
     }
 }
 
@@ -85,7 +94,6 @@ void verifyTapState(){
 
 void fake_tapStep(int tms, int tdi, int CallNum){
   jtagStateMachineTester(tms, tdi);
-  //verifyTapState();
   printf("\nFunction tapStep was called :%i times", CallNum+1);
 }
 
@@ -366,7 +374,7 @@ void test_jtagGoTo_given_CAPTURE_IR_to_UPDARE_IR_expect_correct(void){
   TEST_ASSERT_EQUAL(UPDATE_IR, jtagState.state);
   verifyTapSequence(tapSeq);
 }
-*/
+
 void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_message(void){
   jtagState.state = TEST_LOGIC_RESET;
   jtagState.inData = 0;
@@ -387,5 +395,42 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_mes
   jtagGoTo(jtagState, SHIFT_IR);
 
   TEST_ASSERT_EQUAL(SHIFT_IR, jtagState.state);
+  verifyTapSequence(tapSeq);
+}
+*/
+
+void test_tapWriteBits_given_0xf1_expect_correct(void){
+  jtagState.state = SHIFT_DR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
+
+  TapSequence tapSeq[] = {
+  {SHIFT_DR, 0, 0, 1},    //First cycle data does not inputted
+  {SHIFT_DR, 0b1110001, 0, 7}, // tdi = 1111 0001
+  {EXIT1_DR, 0b1, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  tapWriteBits(0xf1, 8);
+
+  TEST_ASSERT_EQUAL(0xf1, jtagState.inData);
+  verifyTapSequence(tapSeq);
+}
+
+void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void){
+  jtagState.state = SHIFT_IR;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
+
+  TapSequence tapSeq[] = {
+  {SHIFT_IR, 0, 0, 1},    //First cycle data does not inputted
+  {SHIFT_IR, 0b110000, 0, 8}, // tdi = 0110 0000
+  {EXIT1_IR, 0b0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  tapWriteBits(0x61, 8);
+
+  TEST_ASSERT_EQUAL(0x60, jtagState.inData);
   verifyTapSequence(tapSeq);
 }
