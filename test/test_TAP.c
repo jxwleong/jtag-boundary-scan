@@ -5,6 +5,9 @@
 #include "mock_TAP_Mock.h"
 #include "TAP_LookUpTable.h"
 #include "UnityErrorHandler.h"
+#include "CExceptionConfig.h"
+#include "CException.h"
+#include "Exception.h"
 
 
 JtagState jtagState = {TEST_LOGIC_RESET, 0, 0};
@@ -316,7 +319,7 @@ void test_jtagGoTo_given_EXIT2_DR_to_SHIFT_DR_expect_correct(void){
   verifyTapSequence(tapSeq);
 }
 
-void test_jtagGoTo_given_CAPTURE_DR_to_UPDARE_DR_expect_correct(void){
+void test_jtagGoTo_given_CAPTURE_DR_to_UPDATE_DR_expect_correct(void){
   jtagState.state = CAPTURE_DR;
   jtagState.inData = 0;
   jtagState.outData = 0;
@@ -397,8 +400,36 @@ void test_jtagGoTo_given_TEST_LOGIC_RESET_to_SHIFT_IR_wrong_seq_expect_error_mes
   TEST_ASSERT_EQUAL(SHIFT_IR, jtagState.state);
   verifyTapSequence(tapSeq);
 }
-*/
 
+
+*/
+void test_jtagGoTo_given_TEST_LOGIC_RESET_to_TEST_LOGIC_RESET_wrong_seq_expect_error_thrown(void){
+
+  CEXCEPTION_T e;
+  jtagState.state = TEST_LOGIC_RESET;
+  jtagState.inData = 0;
+  jtagState.outData = 0;
+
+  // tms
+  // 0-1-0-..
+  TapSequence tapSeq[] = {
+  {TEST_LOGIC_RESET, 0, 0, 1},
+  {TEST_LOGIC_RESET, 0, 0, 1},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+
+  Try{
+    jtagGoTo(jtagState, TEST_LOGIC_RESET);
+    TEST_ASSERT_EQUAL(TEST_LOGIC_RESET, jtagState.state);
+  }
+  Catch(e){
+    TEST_FAIL_MESSAGE(e->errorMsg);
+  }
+  verifyTapSequence(tapSeq);
+}
+
+/*
 void test_tapWriteBits_given_0xf1_expect_correct(void){
   jtagState.state = SHIFT_DR;
   jtagState.inData = 0;
@@ -417,6 +448,7 @@ void test_tapWriteBits_given_0xf1_expect_correct(void){
   verifyTapSequence(tapSeq);
 }
 
+
 void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void){
   jtagState.state = SHIFT_IR;
   jtagState.inData = 0;
@@ -424,7 +456,7 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
 
   TapSequence tapSeq[] = {
   {SHIFT_IR, 0, 0, 1},    //First cycle data does not inputted
-  {SHIFT_IR, 0b110000, 0, 8}, // tdi = 0110 0000
+  {SHIFT_IR, 0b110000, 0, 7}, // tdi = 0110 0000
   {EXIT1_IR, 0b0, 0, 1},
   {END, 0, 0, 1}};
 
@@ -434,3 +466,4 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
   TEST_ASSERT_EQUAL(0x60, jtagState.inData);
   verifyTapSequence(tapSeq);
 }
+*/

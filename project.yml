@@ -44,8 +44,9 @@
   :test:
     - *common_defines
     - TEST
-
-    # Must include else vsnprint() dont work properly
+    - CEXCEPTION_USE_CONFIG_FILE
+  # The following macro is to ensure vsnprint() return the length of bytes
+  # needed for buffer
     - _ISOC99_SOURCE
 
   :test_preprocess:

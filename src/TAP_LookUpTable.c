@@ -1,6 +1,8 @@
 #include "TAP_LookUpTable.h"
-#include "UnityErrorHandler.h"
 #include "global.h"
+#include "Exception.h"
+//#include "CException.h"
+#include "CExceptionConfig.h"
 
 StateTable stateMachineLookUpTable[16][16] = {
   // current state is TEST_LOGIC_RESET
@@ -164,7 +166,7 @@ void jtagGoTo(JtagState start, TapState end){
     int i = 0;
 
       if(currentState == end)
-          unityError("Start state (%s) is same as end state(%s)", \
+          throwError(1,"Start state (%s) is same as end state(%s)", \
           getTapStateName(currentState), getTapStateName(end));
 
       while(currentState != end){

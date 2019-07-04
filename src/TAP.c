@@ -72,7 +72,7 @@ void tapWriteBits(uint64_t data, int length){
   // noted that last bit of data must be set at next tap state
   while(length > 1){
     oneBitData = dataMask & data;
-    tapStep(0, oneBitData); 
+    tapStep(0, oneBitData);
     jtagState.inData |= oneBitData << (1*i);
     length--;
     data = data >> 1;
