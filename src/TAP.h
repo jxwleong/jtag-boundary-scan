@@ -25,6 +25,11 @@ typedef enum{
   END = 17,
 }TapState;
 
+typedef enum{
+  JTAG_WRITE_BITS = 0,
+  JTAG_READ_BITS = 1,
+}JtagOperation;
+
 typedef struct JtagState JtagState;
 struct JtagState{
   TapState state;
@@ -54,6 +59,6 @@ struct TapTestTable{
 void tapTestLogicReset();
 char *getTapStateName(TapState tapState);
 void tapWriteBits(uint64_t data, int length);
-int tapReadBits(int length);
+uint64_t tapReadBits(int length);
 
 #endif // _TAP_FUNC_H

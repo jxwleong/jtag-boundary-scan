@@ -1,5 +1,6 @@
 #include <unity.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "cmock.h"  // include this header will cause multiple definition of stateMachineLookUpTable
 #include "TAP.h"
 #include "mock_TAP_Mock.h"
@@ -93,9 +94,25 @@ void verifyTapState(){
     }
 }
 
-void fake_tapStep(int tms, int tdi, int CallNum){
+int returnReadBit(){
+  int retval;
+
+  if((tapSeqPtr[tapSeqIndex+1].bits)>1){
+    retval = (tapSeqPtr[tapSeqIndex+1].tdo) & 1;
+    (tapSeqPtr[tapSeqIndex+1].tdo)>>=1;
+  }
+  else{
+    retval = (tapSeqPtr[tapSeqIndex].tdo) & 1;
+    (tapSeqPtr[tapSeqIndex].tdo)>>=1;
+  }
+  return retval;
+}
+
+int fake_tapStep(int tms, int tdi, int CallNum){
   jtagStateMachineTester(tms, tdi);
   printf("\nFunction tapStep was called :%i times", CallNum+1);
+  int retval = returnReadBit();
+  return retval;
 }
 
 
@@ -468,19 +485,20 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
 */
 
 void test_tapReadBits_given_0xff_expect_read_0xff(void){
-  int data = 0;
+  uint64_t data = 0;
   jtagState.state = SHIFT_DR;
   jtagState.inData = 0;
   jtagState.outData = 0xff;
 
   TapSequence tapSeq[] = {
   {SHIFT_DR, 0, 0, 1},    //First cycle data does not inputted
-  {SHIFT_DR, 0b1111111, 0, 7}, // tdi = 1111 1111
-  {EXIT1_DR, 0b1, 0, 1},
+  {SHIFT_DR, 0, 0b1111111, 7}, // tdi = 1111 1111
+  {EXIT1_DR, 0, 0b1, 1},
   {END, 0, 0, 1}};
 
-  //setupFakeTapSeq(tapSeq);
+  setupFakeTapSeq(tapSeq);
   data = tapReadBits(8);
+  printf("%" PRIu64 "\n",data);
   TEST_ASSERT_EQUAL(255, data);
-//  verifyTapSequence(tapSeq);
+  verifyTapSequence(tapSeq);
 }

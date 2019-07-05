@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <inttypes.h>
 #include "TAP_LookUpTable.h"
 #include "TAP.h"
 #include "TAP_Mock.h"
@@ -86,14 +87,17 @@ void tapWriteBits(uint64_t data, int length){
 /*  @param the length of read
     @desc  get the data from the BoundaryScanCell
 */
-int tapReadBits(int length){
+uint64_t tapReadBits(int length){
   int data;
   int i;
 
-  while(length !=0){
-    data |= (jtagState.outData & 1) << i;
+  while(length > 1){
+    data |= (tapStep(0,0)) << i;
     length--;
     i++;
   }
+
+  data |= (tapStep(1,0)) << i;
+  printf("%" PRIu64 "\n",data);
   return data;
 }
