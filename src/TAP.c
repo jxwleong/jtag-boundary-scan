@@ -85,7 +85,7 @@ void tapWriteBits(uint64_t data, int length){
 
 
 /*  @param the length of read
-    @desc  get the data from the BoundaryScanCell
+    @desc  Read the data
 */
 uint64_t tapReadBits(int length){
   int data;

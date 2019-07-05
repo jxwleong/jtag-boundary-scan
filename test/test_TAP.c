@@ -497,7 +497,7 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
   TEST_ASSERT_EQUAL(0x60, jtagState.DataReg);
   verifyTapSequence(tapSeq);
 }
-*/
+
 
 void test_tapReadBits_given_0xff_expect_read_0xff(void){
   uint64_t data = 0;
@@ -514,7 +514,7 @@ void test_tapReadBits_given_0xff_expect_read_0xff(void){
   TEST_ASSERT_EQUAL(255, data);
   verifyTapSequence(tapSeq);
 }
-
+*/
 
 void test_tapReadBits_given_wrong_state_expect_error_message(void){
   uint64_t data = 0;
