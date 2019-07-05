@@ -28,13 +28,14 @@ typedef enum{
 typedef enum{
   JTAG_WRITE_BITS = 0,
   JTAG_READ_BITS = 1,
+  JTAG_TAP_TRAVEL = 2,
 }JtagOperation;
 
 typedef struct JtagState JtagState;
 struct JtagState{
   TapState state;
-  uint64_t inData;
-  uint64_t outData;
+  uint64_t DataReg;
+  JtagOperation operation;
 };
 
 

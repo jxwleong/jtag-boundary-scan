@@ -70,17 +70,17 @@ void tapWriteBits(uint64_t data, int length){
   int i = 0;
 
   // noted that last bit of data must be set at next tap state
-  while(length > 1){
+  while(length > 0){
     oneBitData = dataMask & data;
     tapStep(0, oneBitData);
-    jtagState.inData |= oneBitData << (1*i);
+    jtagState.DataReg |= oneBitData << (1*i);
     length--;
     data = data >> 1;
     i++;
   }
   oneBitData = dataMask & data;
   tapStep(1, oneBitData);
-  jtagState.inData |= oneBitData << (1*i);
+  jtagState.DataReg |= oneBitData << (1*i);
 }
 
 
@@ -89,15 +89,12 @@ void tapWriteBits(uint64_t data, int length){
 */
 uint64_t tapReadBits(int length){
   int data;
-  int i;
+  int i = 0;
 
-  while(length > 1){
+  while(length > 0){
     data |= (tapStep(0,0)) << i;
     length--;
     i++;
   }
-
-  data |= (tapStep(1,0)) << i;
-  printf("%" PRIu64 "\n",data);
   return data;
 }
