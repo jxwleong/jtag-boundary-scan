@@ -98,3 +98,14 @@ uint64_t tapReadBits(int length){
   }
   return data;
 }
+
+
+void loadInstructionRegister(uint64_t data, int length){
+  jtagGoTo(start, SHIFT_IR);
+  tapWriteBits(data, length);
+}
+
+void loadDataRegister(uint64_t data, int length){
+  jtagGoTo(start, SHIFT_DR);
+  tapWriteBits(data, length);
+}
