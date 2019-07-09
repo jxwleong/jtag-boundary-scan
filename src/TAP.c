@@ -101,11 +101,12 @@ uint64_t tapReadBits(int length){
 
 
 void loadInstructionRegister(uint64_t data, int length){
-  jtagGoTo(start, SHIFT_IR);
+  //tapTestLogicReset();
+  jtagGoTo(jtagState, SHIFT_IR);
   tapWriteBits(data, length);
 }
 
 void loadDataRegister(uint64_t data, int length){
-  jtagGoTo(start, SHIFT_DR);
+  jtagGoTo(jtagState, SHIFT_DR);
   tapWriteBits(data, length);
 }

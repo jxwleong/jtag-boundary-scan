@@ -10,6 +10,7 @@
 #include "CException.h"
 #include "Exception.h"
 #include "error.h"
+#include "global.h"
 
 JtagState jtagState = {TEST_LOGIC_RESET, 0, 0};
 
@@ -529,5 +530,29 @@ void test_tapReadBits_given_wrong_state_expect_error_message(void){
   setupFakeTapSeq(tapSeq);
   data = tapReadBits(8);
   TEST_ASSERT_EQUAL(255, data);
+  verifyTapSequence(tapSeq);
+}
+
+
+void test_loadInstructionRegister_given_BYPASS_expect_instruction_written(void){
+  jtagState.state = TEST_LOGIC_RESET;
+  jtagState.DataReg = 0;
+  jtagState.operation = JTAG_WRITE_BITS;
+
+  TapSequence tapSeq[] = {
+  {TEST_LOGIC_RESET, 0, 0, 1},    //First cycle data does not inputted
+  {RUN_TEST_IDLE, 0, 0, 1}, // tdi = 0110 0000
+  {SELECT_DR_SCAN, 0, 0, 1},
+  {SELECT_IR_SCAN, 0, 0, 1},
+  {CAPTURE_IR, 0, 0, 1},
+  {SHIFT_IR, 0, 0, 0},
+  {SHIFT_IR, 0b1111, 0, 0},
+  {SHIFT_IR, 0b1, 0, 0},
+  {END, 0, 0, 1}};
+
+  setupFakeTapSeq(tapSeq);
+  loadInstructionRegister(BYPASS ,5);
+
+  TEST_ASSERT_EQUAL(0b11111, jtagState.DataReg);
   verifyTapSequence(tapSeq);
 }

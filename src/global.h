@@ -3,11 +3,11 @@
 
 #include "TAP.h"
 
-#define BYPASS    11111
-#define EXTEST    00000
-#define SAMPLE    00010
-#define PRELOAD   00010
-#define IDCODE    00001
+#define BYPASS    0b11111
+#define EXTEST    0b00000
+#define SAMPLE    0b00010
+#define PRELOAD   0b00010
+#define IDCODE    0b00001
 
 extern JtagState jtagState;
 
