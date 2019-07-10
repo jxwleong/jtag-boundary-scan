@@ -1,7 +1,6 @@
 #ifndef _TAP_LOOKUPTABLE_H
 #define _TAP_LOOKUPTABLE_H
 
-#include "global.h"
 #include "TAP.h"
 #include "TAP_Mock.h"
 

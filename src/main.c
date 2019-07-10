@@ -125,7 +125,7 @@ int main(void)
 	HAL_Delay(500);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);*/
 
-	  val = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
+	  val = readTapTdi(64);
 
   /* USER CODE END WHILE */
 
