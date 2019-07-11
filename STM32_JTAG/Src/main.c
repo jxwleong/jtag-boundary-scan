@@ -195,23 +195,48 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void writeTms(int tms){
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
+
+void delay(uint32_t cycles){
+	while(cycles--);
 }
+
 
 void setClock(int clk){
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, clk);
 }
 
-void writeTdi(int data){
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, data);
+void writeTms(int tms){
+	setClock(0);
+	HAL_Delay(50);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
+	HAL_Delay(5);
+	setClock(1);
+	HAL_Delay(50);
 }
 
-void clockGen(int ms){
-	setClock(1);
-	HAL_Delay(ms);
+void writeBit(int data, int tms){
+	volatile int output;
 	setClock(0);
-	HAL_Delay(ms);
+	HAL_Delay(50);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, data);
+	HAL_Delay(5);
+	setClock(1);
+	HAL_Delay(50);
+}
+
+int readBit(int data, int tms){
+	volatile int outData;
+	setClock(0);
+	HAL_Delay(50);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, data);
+	HAL_Delay(5);
+	setClock(1);
+	HAL_Delay(50);
+	setClock(0);
+	outData = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
+	return outData;
 }
 
 void resetTapState(){
@@ -219,29 +244,27 @@ void resetTapState(){
 
   while(i < 5){
 	writeTms(1);
-	HAL_Delay(10);
-	setClock(1);
-	HAL_Delay(50);
-	setClock(0);
-	HAL_Delay(50);
     i++;
   }
 }
 
-uint64_t readTapTdi(int length){
-  uint64_t data = 0;
-  int i = 0;
+void jtagWriteTms(uint64_t data, int length){
+  int dataMask = 1;
+  int oneBitData = 0;
 
   while(length > 0){
-	setClock(1);
-	HAL_Delay(50);
-	setClock(0);
-    data |= HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) << i;
-    HAL_Delay(50);
+    oneBitData = dataMask & data;
+    writeTms(oneBitData);
     length--;
-    i++;
+    data = data >> 1;
   }
-  return data;
+}
+
+
+void switchSwdToJtagMode(){
+	jtagWriteTms(0x3FFFFFFFFFFFF, 50);
+	jtagWriteTms(0xE73C, 16);
+	resetTapState();
 }
 
 
@@ -249,31 +272,41 @@ void jtagWriteBits(uint64_t data, int length){
   int dataMask = 1;
   int oneBitData = 0;
   int i = 0;
-
+  int bits = length ;
   // noted that last bit of data must be set at next tap state
-  while(length > 0){
-    oneBitData = dataMask & data;
-    writeTms(0);
-    HAL_Delay(5);
-    setClock(1);
-    writeTdi(oneBitData);
-    HAL_Delay(50);
-    setClock(0);
-    HAL_Delay(50);
+  while(length > 1){
+	oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+    writeBit(oneBitData ,0);
     length--;
-    data = data >> 1;
-    writeDR |= oneBitData << (1*i);
+    data = data << 1;
     i++;
   }
-  oneBitData = dataMask & data;
-  writeTms(1);
-  HAL_Delay(5);
-  setClock(1);
-  writeTdi(oneBitData);
-  HAL_Delay(50);
-  setClock(0);
-  HAL_Delay(50);
-  writeDR |= oneBitData << (1*i);
+  oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+  writeBit(oneBitData ,1);
+  length--;
+  data = data << 1;
+}
+
+uint64_t jtagReadBits(uint64_t data, int length){
+	int dataMask = 1;
+	int oneBitData = 0;
+	int i = 0;
+	int bits = length;
+	uint64_t outData = 0;
+
+	// noted that last bit of data must be set at next tap state
+	while(length > 1){
+	  oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+	  outData |= readBit(oneBitData, 0) << (i*1);
+	  length--;
+	  data = data << 1;
+	  i++;
+	}
+	oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+	outData |= readBit(oneBitData, 0) << (i*1);
+	length--;
+	data = data << 1;
+	return outData;
 }
 
 void tapTravelFromTo(TapState start, TapState end){
@@ -281,33 +314,33 @@ void tapTravelFromTo(TapState start, TapState end){
     int tmsRequired;
     int i = 0;
 
-
       while(currentState != end){
           tmsRequired = getTmsRequired(currentState, end);
           writeTms(tmsRequired);
-          HAL_Delay(5);
-          setClock(1);
-          HAL_Delay(50);
-          writeTms(0);
-          setClock(0);
-          HAL_Delay(50);
-
           currentState = stateTable[currentState][end].nextState;
           i++;
           }
 }
 
-void loadJtagIR(int data){
+void loadJtagIR(int instructionCode, int length){
   resetTapState();
   tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
-  jtagWriteBits(data, 9);
+  jtagWriteBits(instructionCode, length);
   tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
 
-void loadJtagDR(int data, int length){
+void loadJtagDR(uint64_t data, int length){
   tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
   jtagWriteBits(data, length);
+  tapTravelFromTo(EXIT1_DR, SELECT_DR_SCAN);
+}
+
+uint64_t readJtagDr(uint64_t data, int length){
+  uint64_t outData;
+  tapTravelFromTo(SELECT_DR_SCAN, SHIFT_DR);
+  outData = jtagReadBits(data, length);
   tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+  return outData;
 }
 
 /* USER CODE END 0 */
@@ -343,15 +376,18 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+  switchSwdToJtagMode();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	loadJtagIR(IDCODE);
-	loadJtagDR(0xffff,32);
+	//loadJtagIR(0b111111110,9);
+	loadJtagIR(0b011111111,9);
+	loadJtagDR(0x0ffff0000,33);
+	val = readJtagDr(0x00000ffff,33);
+	//loadJtagIR(0b111111110,9);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

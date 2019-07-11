@@ -7,7 +7,7 @@
 #define EXTEST    0b00000
 #define SAMPLE    0b00010
 #define PRELOAD   0b00010
-#define IDCODE    0b0000101110
+#define IDCODE    0b000011110
 
 extern JtagState jtagState;
 
