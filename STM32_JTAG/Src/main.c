@@ -215,7 +215,6 @@ void writeTms(int tms){
 }
 
 void writeBit(int data, int tms){
-	volatile int output;
 	setClock(0);
 	HAL_Delay(50);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
@@ -235,6 +234,7 @@ int readBit(int data, int tms){
 	setClock(1);
 	HAL_Delay(50);
 	setClock(0);
+	HAL_Delay(5);
 	outData = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
 	return outData;
 }
@@ -290,22 +290,22 @@ void jtagWriteBits(uint64_t data, int length){
 uint64_t jtagReadBits(uint64_t data, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
-	int i = 0;
-	int bits = length;
+	int i = 1;
 	uint64_t outData = 0;
-
+	outData |= HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
+	length--;
 	// noted that last bit of data must be set at next tap state
 	while(length > 1){
-	  oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+	  oneBitData = dataMask & data;
 	  outData |= readBit(oneBitData, 0) << (i*1);
 	  length--;
-	  data = data << 1;
+	  data = data >> 1;
 	  i++;
 	}
-	oneBitData = ((dataMask << (bits-1)) & data) >> (bits - 1);
+
+	oneBitData = dataMask & data;
 	outData |= readBit(oneBitData, 0) << (i*1);
 	length--;
-	data = data << 1;
 	return outData;
 }
 
@@ -335,9 +335,9 @@ void loadJtagDR(uint64_t data, int length){
   tapTravelFromTo(EXIT1_DR, SELECT_DR_SCAN);
 }
 
-uint64_t readJtagDr(uint64_t data, int length){
+uint64_t jtagWriteAndRead(uint64_t data, int length){
   uint64_t outData;
-  tapTravelFromTo(SELECT_DR_SCAN, SHIFT_DR);
+  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
   outData = jtagReadBits(data, length);
   tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
   return outData;
@@ -352,7 +352,7 @@ uint64_t readJtagDr(uint64_t data, int length){
   */
 int main(void)
 
-{
+   {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
   /* USER CODE END 1 */
@@ -377,16 +377,25 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   switchSwdToJtagMode();
+
+  //loadJtagIR(0b111111111, 9);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	//loadJtagIR(0b111111110,9);
-	loadJtagIR(0b011111111,9);
-	loadJtagDR(0x0ffff0000,33);
-	val = readJtagDr(0x00000ffff,33);
+
+	  loadJtagIR(0b000011111, 9);
+	  //val = readJtagDr(0b1110001,9);
+	  val = jtagWriteAndRead(0x0ffffffff,33);
+	 //val = val & 0x00000000ffffffff;
+	  val = jtagWriteAndRead(0x0ffffffff,33);
+	  //val = val & 0x00000001ffffffff;
+	loadJtagIR(0b111111110,9);
+	  //jtagReadBits(0x00000000, 32);
+	//loadJtagDR(0x0ffff0000,33);
+
 	//loadJtagIR(0b111111110,9);
   /* USER CODE END WHILE */
 
