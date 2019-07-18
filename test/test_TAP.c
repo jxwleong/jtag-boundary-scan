@@ -153,7 +153,7 @@ void verifyTapSequence(TapSequence tapSeq[]){
   state, TAP state machine only travel at rising edge so
   TMS must be set before the rising edge*/
 
-/*
+
 void test_tapTestLogicReset_given_extra_seq_on_entry_5_expect_error_msg(void){
 
 
@@ -515,7 +515,7 @@ void test_tapReadBits_given_0xff_expect_read_0xff(void){
   TEST_ASSERT_EQUAL(255, data);
   verifyTapSequence(tapSeq);
 }
-*/
+
 
 void test_tapReadBits_given_wrong_state_expect_error_message(void){
   uint64_t data = 0;

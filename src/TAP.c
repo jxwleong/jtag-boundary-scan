@@ -69,7 +69,7 @@ void tapWriteBits(uint64_t data, int length){
   int i = 0;
 
   // noted that last bit of data must be set at next tap state
-  while(length > 0){
+  while(length > 1){
     oneBitData = dataMask & data;
     tapStep(0, oneBitData);
     jtagState.DataReg |= oneBitData << (1*i);
@@ -97,6 +97,7 @@ uint64_t tapReadBits(int length){
   }
   return data;
 }
+
 
 
 void loadInstructionRegister(uint64_t data, int length){

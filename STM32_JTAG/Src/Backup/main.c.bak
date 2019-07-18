@@ -182,7 +182,14 @@ StateTable stateTable[16][16] = {
 
 };
 
-int writeDR = 0;
+uint64_t tms = 0;
+uint64_t tdi = 0;
+uint64_t tdo = 0;
+uint32_t Count = 0;
+uint64_t jtagReadIDCode(){
+//uint32_t val;
+}
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -196,57 +203,92 @@ static void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN 0 */
 
-void delay(uint32_t cycles){
+void jtagDelay(uint32_t cycles){
 	while(cycles--);
 }
 
 
 void setClock(int clk){
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, clk);
+	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
 }
 
-void writeTms(int tms){
-	setClock(0);
-	HAL_Delay(50);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
-	HAL_Delay(5);
-	setClock(1);
-	HAL_Delay(50);
+void setTdi(int tdi){
+	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
 }
 
-void writeBit(int data, int tms){
-	setClock(0);
-	HAL_Delay(50);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, data);
-	HAL_Delay(5);
-	setClock(1);
-	HAL_Delay(50);
+void setTms(int tms){
+	HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
 }
 
-int readBit(int data, int tms){
-	volatile int outData;
+int readTdo(){
+	int tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
+	return tdo;
+}
+
+void tckCycle(){
 	setClock(0);
-	HAL_Delay(50);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, tms);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, data);
-	HAL_Delay(5);
+	jtagDelay(500);
 	setClock(1);
-	HAL_Delay(50);
+	jtagDelay(500);
+}
+
+void tdicycle(int tdi){
+	setTdi(tdi);
 	setClock(0);
-	HAL_Delay(5);
-	outData = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
-	return outData;
+	jtagDelay(500);
+	setClock(1);
+	jtagDelay(500);
+}
+
+#define tdioCycle(tdi, tdo)	\
+	setClock(0);		\
+	jtagDelay(500);		\
+	tdo = setTdi(tdi);	\
+	setClock(0);		\
+	jtagDelay(500);		\
+
+
+void jtagIOInit(){
+	 tms = 0;
+	 tdi = 0;
+	 tdo = 0;
+	 Count = 0;
 }
 
 void resetTapState(){
-  int i = 0;
+	int i = 0;
 
-  while(i < 5){
-	writeTms(1);
-    i++;
-  }
+	 while(i < 5){
+	   setTms(1);
+	   tckCycle();
+	   tms |= 1 << (Count*1);
+	   tdi |= 0 << (Count*1);
+	   tdo |= 0 << (Count*1);
+	   Count++;
+	   i++;
+	 }
 }
+
+
+void tapTravelFromTo(TapState start, TapState end){
+    TapState currentState = start;
+    int tmsRequired;
+    int i = 0;
+
+      while(currentState != end){
+          tmsRequired = getTmsRequired(currentState, end);
+          setTms(tmsRequired);
+          tckCycle();
+          tms |= tmsRequired << (Count*1);
+          tdi |= 0 << (Count*1);
+          tdo |= 0 << (Count*1);
+          Count++;
+          currentState = stateTable[currentState][end].nextState;
+          i++;
+          }
+}
+
+
 
 void jtagWriteTms(uint64_t data, int length){
   int dataMask = 1;
@@ -254,7 +296,8 @@ void jtagWriteTms(uint64_t data, int length){
 
   while(length > 0){
     oneBitData = dataMask & data;
-    writeTms(oneBitData);
+    setTms(oneBitData);
+    tckCycle();
     length--;
     data = data >> 1;
   }
@@ -268,64 +311,55 @@ void switchSwdToJtagMode(){
 }
 
 
-void jtagWriteBits(uint64_t data, int length){
-  int dataMask = 1;
-  int oneBitData = 0;
-  int i = 0;
-  int bits = length ;
-  // noted that last bit of data must be set at next tap state
-  while(length > 1){
-	oneBitData = data & dataMask;
-    writeBit(oneBitData ,0);
-    length--;
-    data = data << 1;
-    i++;
-  }
-  oneBitData = data & dataMask;
-  writeBit(oneBitData ,1);
-  length--;
-  data = data << 1;
+int jtagWriteAndReadBit(int data){
+	int tdo;
+	setTdi(data);
+	jtagDelay(100);
+	setClock(1);		// Insert the input first
+	jtagDelay(500);
+	setClock(0);
+	//jtagDelay(500);
+	tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
+	return tdo;//
 }
 
 uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
-	int i = 1;
+	int tdoData = 0;
+	int i = 0;
+	int n = 0;
 	uint64_t outData = 0;
-	//outData |= HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
-	length--;
+
 	// noted that last bit of data must be set at next tap state
-	while(length > 1){
+	for (n = length ; n > 1; n--) {
 	  oneBitData = dataMask & data;
-	  outData |= readBit(oneBitData, 0) << (i*1);
-	  length--;
+	  setTms(0);
+	  tdoData = jtagWriteAndReadBit(oneBitData);
+      tdo |= tdoData << (Count*1);
+	  outData |= tdoData << (i*1);
+      tms |= 0 << (Count*1);
+      tdi |= oneBitData << (Count*1);
+      Count++;
 	  data = data >> 1;
 	  i++;
 	}
-
 	oneBitData = dataMask & data;
-	outData |= readBit(oneBitData, 1) << (i*1);
-	length--;
+	setTms(1);
+	jtagDelay(100);
+	tdoData = jtagWriteAndReadBit(oneBitData);
+	tdo |= tdoData << (Count*1);
+	outData |= tdoData << (i*1);;
+	tdi |= oneBitData << (Count*1);
+    tms |= 1 << (Count*1);
+    Count++;
 	return outData;
-}
-
-void tapTravelFromTo(TapState start, TapState end){
-    TapState currentState = start;
-    int tmsRequired;
-    int i = 0;
-
-      while(currentState != end){
-          tmsRequired = getTmsRequired(currentState, end);
-          writeTms(tmsRequired);
-          currentState = stateTable[currentState][end].nextState;
-          i++;
-          }
 }
 
 void loadJtagIR(int instructionCode, int length){
   resetTapState();
   tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
-  jtagWriteBits(instructionCode, length);
+  jtagWriteAndReadBits(instructionCode, length);
   tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
 
@@ -338,6 +372,22 @@ uint64_t jtagWriteAndRead(uint64_t data, int length){
   return outData;
 }
 
+uint64_t jtagBypass(int data, int length){
+	uint64_t val = 0;
+	loadJtagIR(0b111111111, length);
+	jtagIOInit();
+	val = jtagWriteAndRead(data,length);
+	return val;
+}
+
+void loadBypassRegister(int bypassData, int length){
+	loadJtagIR(0b111111111, length);
+	jtagIOInit();
+	jtagWriteAndRead(bypassData, length);
+
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -349,6 +399,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
+	int i = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -370,9 +421,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  switchSwdToJtagMode();
 
-  //loadJtagIR(0b111111111, 9);
+  /*switchSwdToJtagMode();
+  jtagIOInit();
+  loadBypassRegister(0b00, 2);
+  jtagIOInit();
+  val = jtagBypass(0b1110001, 9);
+*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -391,19 +446,74 @@ int main(void)
 	   * 			--------------> ------> ----> 	TDO
 	   * 	Expect result from TDO is 0b111000111	(LSB first)
 	   */
-	  resetTapState();
-	  loadJtagIR(0b111111111, 9);
-	  //val = jtagWriteAndRead(0b11, 2);
-	  val = jtagWriteAndRead(0b1110001,9);
+
+
+	  val = 0;
+
+	  setClock(1);
+	  val = HAL_GPIO_ReadPin(TMS_GPIO_Port, TMS_Pin);
+	  jtagDelay(500);
+
+	  setClock(0);
+	  jtagDelay(500);
+
+	  val = 1;
+	  setClock(1);
+	  val = HAL_GPIO_ReadPin(TMS_GPIO_Port, TMS_Pin);
+	  jtagDelay(500);
+	  setClock(0);
+	  jtagDelay(500);
+
+/*
+	  val = 0;
+	  setClock(1);
+	  jtagDelay(500);
+	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
+	  setClock(0);
+	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
+	  i++;
+
+	  setClock(1);
+	  jtagDelay(500);
+	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 1);
+	  setClock(0);
+	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
+	  i++;
+
+	  setClock(1);
+	  jtagDelay(500);
+	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
+	  setClock(0);
+	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
+	  i++;
+
+	  setClock(1);
+	  jtagDelay(500);
+	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 1);
+	  setClock(0);
+	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
+	  i++;
+
+	  setClock(1);
+	  jtagDelay(500);
+	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
+	  setClock(0);
+	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
+	  i++;
+*/
+
+
+	  //resetTapState();
+	  //val = jtagWriteAndRead(0x00000000, 64);
+	  //tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
+	  //jtagWriteAndReadBits(0b10, 2);
+
+	  //110010010
+	  //110010010
 
 
 
-	  //val = jtagWriteAndRead(0x0ffffffff,33);
-	 //val = val & 0x00000000ffffffff;
-	  //val = jtagWriteAndRead(0x0ffffffff,33);
-	  //val = val & 0x00000001ffffffff;
-	//loadJtagIR(0b111111110,9);
-	  //jtagReadBits(0x00000000, 32);
+	 //jtagReadBits(0x00000000, 32);
 	//loadJtagDR(0x0ffff0000,33);
 
 	//loadJtagIR(0b111111110,9);
@@ -428,10 +538,13 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV2;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL13;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -441,12 +554,12 @@ void SystemClock_Config(void)
     */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -481,27 +594,26 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, TCK_Pin|TMS_Pin|TDI_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, TCK_Pin|TDI_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : TDO_Pin */
   GPIO_InitStruct.Pin = TDO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(TDO_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : TCK_Pin */
-  GPIO_InitStruct.Pin = TCK_Pin;
+  /*Configure GPIO pins : TCK_Pin TDI_Pin */
+  GPIO_InitStruct.Pin = TCK_Pin|TDI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(TCK_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : TMS_Pin TDI_Pin */
-  GPIO_InitStruct.Pin = TMS_Pin|TDI_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TMS_Pin */
+  GPIO_InitStruct.Pin = TMS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(TMS_GPIO_Port, &GPIO_InitStruct);
 
 }
 
