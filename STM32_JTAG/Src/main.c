@@ -186,9 +186,8 @@ uint64_t tms = 0;
 uint64_t tdi = 0;
 uint64_t tdo = 0;
 uint32_t Count = 0;
-uint64_t jtagReadIDCode(){
 //uint32_t val;
-}
+
 
 /* USER CODE END PV */
 
@@ -203,27 +202,12 @@ static void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN 0 */
 
-void jtagDelay(uint32_t cycles){
-	while(cycles--);
-}
 
+#define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
+#define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
+#define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
+#define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
 
-void setClock(int clk){
-	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
-}
-
-void setTdi(int tdi){
-	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
-}
-
-void setTms(int tms){
-	HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
-}
-
-int readTdo(){
-	int tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-	return tdo;
-}
 
 void tckCycle(){
 	setClock(0);
@@ -232,12 +216,20 @@ void tckCycle(){
 	jtagDelay(500);
 }
 
-void tdicycle(int tdi){
+void tdiCycle(int tdi){
 	setTdi(tdi);
 	setClock(0);
 	jtagDelay(500);
 	setClock(1);
 	jtagDelay(500);
+}
+
+int tdoCycle(){
+	int val = 0;
+	setClock(0);
+	val = readTdo();
+	return val;
+
 }
 
 #define tdioCycle(tdi, tdo)	\
@@ -247,6 +239,10 @@ void tdicycle(int tdi){
 	setClock(0);		\
 	jtagDelay(500);		\
 
+
+void jtagDelay(uint32_t cycles){
+	while(cycles--);
+}
 
 void jtagIOInit(){
 	 tms = 0;
@@ -310,17 +306,15 @@ void switchSwdToJtagMode(){
 	resetTapState();
 }
 
-
-int jtagWriteAndReadBit(int data){
-	int tdo;
-	setTdi(data);
-	jtagDelay(100);
-	setClock(1);		// Insert the input first
+int jtagWriteAndReadBit(int data, int tms){
+	int val = 0;
+	setTms(tms);
+	writeTdi(data);
+	setClock(1);
 	jtagDelay(500);
 	setClock(0);
-	//jtagDelay(500);
-	tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-	return tdo;//
+	val = readTdo();
+	return val;
 }
 
 uint64_t jtagWriteAndReadBits(uint64_t data, int length){
@@ -334,8 +328,7 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	// noted that last bit of data must be set at next tap state
 	for (n = length ; n > 1; n--) {
 	  oneBitData = dataMask & data;
-	  setTms(0);
-	  tdoData = jtagWriteAndReadBit(oneBitData);
+	  tdoData = jtagWriteAndReadBit(oneBitData, 0);
       tdo |= tdoData << (Count*1);
 	  outData |= tdoData << (i*1);
       tms |= 0 << (Count*1);
@@ -345,9 +338,7 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	  i++;
 	}
 	oneBitData = dataMask & data;
-	setTms(1);
-	jtagDelay(100);
-	tdoData = jtagWriteAndReadBit(oneBitData);
+	tdoData = jtagWriteAndReadBit(oneBitData, 1);
 	tdo |= tdoData << (Count*1);
 	outData |= tdoData << (i*1);;
 	tdi |= oneBitData << (Count*1);
@@ -387,7 +378,21 @@ void loadBypassRegister(int bypassData, int length){
 
 }
 
+uint64_t jtagReadIDCode(int instructionCode, int length){
+	uint64_t valRead = 0;
+	loadJtagIR(instructionCode, length);
+	valRead = jtagWriteAndReadBits(0xffffffff, 32);
+	return valRead;
+}
 
+uint64_t jtagReadIDCodeResetTAP(){
+	uint64_t valRead = 0;
+	resetTapState();
+	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+	valRead = jtagWriteAndReadBits(0xffffffffffffffff, 64);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+	return valRead;
+}
 /* USER CODE END 0 */
 
 /**
@@ -428,6 +433,46 @@ int main(void)
   jtagIOInit();
   val = jtagBypass(0b1110001, 9);
 */
+/*
+  resetTapState();
+  tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+
+  for(int i = 0; i <31; i++){
+	 setTms(0);
+	 setClock(1);
+		jtagDelay(500);
+	  val |= tdoCycle() << (i*1);
+      tms |= 0 << (Count*1);
+      Count++;
+  }
+	 setTms(1);
+	 setClock(1);
+		jtagDelay(500);
+  val |= tdoCycle() << (i*1);
+  tms |= 1 << (Count*1);
+  val = 0;
+
+
+  resetTapState();
+  tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+  for(int i = 0; i <31; i++){
+	  val |= jtagWriteAndReadBit(0, 0) << (i*1);
+      tms |= 0 << (Count*1);
+      Count++;
+  }
+
+  val |= jtagWriteAndReadBit(0, 1) << (i*1);
+  tms |= 1 << (Count*1);
+  val = 0;
+  */
+
+
+
+  val = jtagReadIDCodeResetTAP();
+  val = 0;
+  jtagIOInit();
+  val = jtagReadIDCode(0b111111110, 9);
+  val = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -447,9 +492,7 @@ int main(void)
 	   * 	Expect result from TDO is 0b111000111	(LSB first)
 	   */
 
-
-	  val = 0;
-
+/*
 	  setClock(1);
 	  jtagDelay(500);
 
