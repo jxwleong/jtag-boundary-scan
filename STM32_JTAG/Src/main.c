@@ -182,11 +182,30 @@ StateTable stateTable[16][16] = {
 
 };
 
+TapTestTable tapTrackTable[16] = {{TEST_LOGIC_RESET, RUN_TEST_IDLE, TEST_LOGIC_RESET},
+                             {RUN_TEST_IDLE, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                             {SELECT_DR_SCAN, CAPTURE_DR, SELECT_IR_SCAN},
+                             {CAPTURE_DR, SHIFT_DR, EXIT1_DR},
+                             {SHIFT_DR, SHIFT_DR, EXIT1_DR},
+                             {EXIT1_DR, PAUSE_DR, UPDATE_DR},
+                             {PAUSE_DR, PAUSE_DR, EXIT2_DR},
+                             {EXIT2_DR, SHIFT_DR, UPDATE_DR},
+                             {UPDATE_DR, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                             {SELECT_IR_SCAN, CAPTURE_IR, TEST_LOGIC_RESET},
+                             {CAPTURE_IR, SHIFT_IR, EXIT1_IR},
+                             {SHIFT_IR, SHIFT_IR, EXIT1_IR},
+                             {EXIT1_IR, PAUSE_IR, UPDATE_IR},
+                             {PAUSE_IR, PAUSE_IR, EXIT2_IR},
+                             {EXIT2_IR, SHIFT_IR, UPDATE_IR},
+                             {UPDATE_IR, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                           };
 uint64_t tms = 0;
 uint64_t tdi = 0;
 uint64_t tdo = 0;
 uint32_t Count = 0;
-//uint32_t val;
+
+TapState currentTapState = TEST_LOGIC_RESET;
+
 
 
 /* USER CODE END PV */
@@ -201,13 +220,22 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+#define CORTEX_M3_INSTRUCTION_LENGTH	9
+#define BYPASS_BOTH_TAP		0b111111111
 
 #define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
 #define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
 #define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
 #define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
 
+
+
+TapState updateTapState(TapState currentState, int tms){
+      if(tms == 1)
+    	  return (tapTrackTable[currentState].nextState_tms1);
+      else if(tms == 0)
+    	  return (tapTrackTable[currentState].nextState_tms0);
+}
 
 void tckCycle(){
 	setClock(0);
@@ -249,6 +277,7 @@ void jtagIOInit(){
 	 tdi = 0;
 	 tdo = 0;
 	 Count = 0;
+	 currentTapState = TEST_LOGIC_RESET;
 }
 
 void resetTapState(){
@@ -257,6 +286,7 @@ void resetTapState(){
 	 while(i < 5){
 	   setTms(1);
 	   tckCycle();
+	   currentTapState =updateTapState(currentTapState, 1);
 	   tms |= 1 << (Count*1);
 	   tdi |= 0 << (Count*1);
 	   tdo |= 0 << (Count*1);
@@ -271,10 +301,12 @@ void tapTravelFromTo(TapState start, TapState end){
     int tmsRequired;
     int i = 0;
 
+
       while(currentState != end){
           tmsRequired = getTmsRequired(currentState, end);
           setTms(tmsRequired);
           tckCycle();
+          currentTapState =updateTapState(currentState, tmsRequired);
           tms |= tmsRequired << (Count*1);
           tdi |= 0 << (Count*1);
           tdo |= 0 << (Count*1);
@@ -329,6 +361,7 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	for (n = length ; n > 1; n--) {
 	  oneBitData = dataMask & data;
 	  tdoData = jtagWriteAndReadBit(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
       tdo |= tdoData << (Count*1);
 	  outData |= tdoData << (i*1);
       tms |= 0 << (Count*1);
@@ -339,6 +372,7 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	}
 	oneBitData = dataMask & data;
 	tdoData = jtagWriteAndReadBit(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
 	tdo |= tdoData << (Count*1);
 	outData |= tdoData << (i*1);;
 	tdi |= oneBitData << (Count*1);
@@ -363,18 +397,18 @@ uint64_t jtagWriteAndRead(uint64_t data, int length){
   return outData;
 }
 
-uint64_t jtagBypass(int data, int length){
+uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLength){
 	uint64_t val = 0;
-	loadJtagIR(0b111111111, length);
+	loadJtagIR(instruction, instructionLength);
 	jtagIOInit();
-	val = jtagWriteAndRead(data,length);
+	val = jtagWriteAndRead(data,dataLength);
 	return val;
 }
 
-void loadBypassRegister(int bypassData, int length){
-	loadJtagIR(0b111111111, length);
+void loadBypassRegister(int instruction, int instructionLength, int data, int dataLength){
+	loadJtagIR(instruction, instructionLength);
 	jtagIOInit();
-	jtagWriteAndRead(bypassData, length);
+	jtagWriteAndRead(data, dataLength);
 
 }
 
@@ -471,8 +505,13 @@ int main(void)
   val = jtagReadIDCodeResetTAP();
   val = 0;
   jtagIOInit();
-  val = jtagReadIDCode(0b111111110, 9);
+  loadBypassRegister(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
+	  	  			0b00, 2);
+  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
+		  	  	  	0b1110001, 9);
   val = 0;
+  //val = jtagBypass(0x0, 9);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
