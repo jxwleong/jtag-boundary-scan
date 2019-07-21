@@ -228,13 +228,20 @@ static void MX_GPIO_Init(void);
 #define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
 #define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
 
+typedef struct data64bit  data64bit;
+struct data64bit{
+	uint32_t lowerNibble;
+	uint32_t upperNibble;
+};
 
 
 TapState updateTapState(TapState currentState, int tms){
+	TapState retval;
       if(tms == 1)
-    	  return (tapTrackTable[currentState].nextState_tms1);
+    	  retval =  (tapTrackTable[currentState].nextState_tms1);
       else if(tms == 0)
-    	  return (tapTrackTable[currentState].nextState_tms0);
+    	  retval =  (tapTrackTable[currentState].nextState_tms0);
+    return retval;
 }
 
 void tckCycle(){
@@ -349,6 +356,7 @@ int jtagWriteAndReadBit(int data, int tms){
 	return val;
 }
 
+
 uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
@@ -380,6 +388,53 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
     Count++;
 	return outData;
 }
+
+
+data64bit WriteAndReadBits(uint64_t data, int length){
+	int dataMask = 1;
+	int oneBitData = 0;
+	int tdoData = 0;
+	int i = 0;
+	int n = 0;
+	data64bit outData;
+
+	// noted that last bit of data must be set at next tap state
+	for (n = length ; n > 1; n--) {
+	  oneBitData = dataMask & data;
+	  tdoData = jtagWriteAndReadBit(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
+      tdo |= tdoData << (Count*1);
+      if(n>31)
+    	  outData.lowerNibble |= tdoData << (i*1);
+      else{
+    	  i = 0;
+    	  outData.upperNibble |= tdoData << (i*1);
+      }
+
+      tms |= 0 << (Count*1);
+      tdi |= oneBitData << (Count*1);
+      Count++;
+	  data = data >> 1;
+	  i++;
+	}
+	oneBitData = dataMask & data;
+	tdoData = jtagWriteAndReadBit(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
+	tdo |= tdoData << (Count*1);
+    if(n>31)
+  	  outData.lowerNibble |= tdoData << (i*1);
+    else{
+   	  i = 0;
+   	  outData.upperNibble |= tdoData << (i*1);
+     }
+	tdi |= oneBitData << (Count*1);
+    tms |= 1 << (Count*1);
+    Count++;
+	return outData;
+}
+
+
+
 
 void loadJtagIR(int instructionCode, int length){
   resetTapState();
@@ -438,6 +493,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
+	volatile data64bit IdCode;
 	int i = 0;
   /* USER CODE END 1 */
 
@@ -500,7 +556,10 @@ int main(void)
   val = 0;
   */
 
-
+  resetTapState();
+  	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+  	IdCode = WriteAndReadBits(0xffffffffffffffff, 64);
+  	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
 
   val = jtagReadIDCodeResetTAP();
   val = 0;
