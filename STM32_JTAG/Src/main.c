@@ -223,6 +223,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN 0 */
 #define CORTEX_M3_INSTRUCTION_LENGTH	9
 #define BYPASS_BOTH_TAP		0b111111111
+#define READ_BOTH_IDCODE	0b000010001
 
 #define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
 #define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
@@ -397,7 +398,6 @@ void loadJtagIR(int instructionCode, int length){
   tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
 
-
 uint64_t jtagWriteAndRead(uint64_t data, int length){
   uint64_t outData;
   tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
@@ -424,7 +424,7 @@ void loadBypassRegister(int instruction, int instructionLength, int data, int da
 uint64_t jtagReadIDCode(int instructionCode, int length){
 	uint64_t valRead = 0;
 	loadJtagIR(instructionCode, length);
-	valRead = jtagWriteAndReadBits(0xffffffff, 32);
+	valRead = jtagWriteAndReadBits(0xffffffffffffffff, 64);
 	return valRead;
 }
 
@@ -471,62 +471,26 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-/*
-  switchSwdToJtagMode();
-  jtagIOInit();
-  loadBypassRegister(0b00, 2);
-  jtagIOInit();
-  val = jtagBypass(0b1110001, 9);
-*/
-/*
-  resetTapState();
-  tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
-
-  for(int i = 0; i <31; i++){
-	 setTms(0);
-	 setClock(1);
-		jtagDelay(500);
-	  val |= tdoCycle() << (i*1);
-      tms |= 0 << (Count*1);
-      Count++;
-  }
-	 setTms(1);
-	 setClock(1);
-		jtagDelay(500);
-  val |= tdoCycle() << (i*1);
-  tms |= 1 << (Count*1);
-  val = 0;
 
 
-  resetTapState();
-  tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
-  for(int i = 0; i <31; i++){
-	  val |= jtagWriteAndReadBit(0, 0) << (i*1);
-      tms |= 0 << (Count*1);
-      Count++;
-  }
 
-  val |= jtagWriteAndReadBit(0, 1) << (i*1);
-  tms |= 1 << (Count*1);
-  val = 0;
-  */
-
-
+  //switchSwdToJtagMode();
 
   val = jtagReadIDCodeResetTAP();
   val = 0;
   jtagIOInit();
-  loadBypassRegister(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
-	  	  			0b00, 2);
+  val = jtagReadIDCode(READ_BOTH_IDCODE, CORTEX_M3_INSTRUCTION_LENGTH);
+  //jtagIOInit();
+  //loadBypassRegister(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
+	  	  			0b11, 2);
+  jtagIOInit();
   val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
-		  	  	  	0b1110001, 9);
+		  	  	  	0xf0, 9);
 
-  test = 1ULL <<31;
-  test = 1ULL <<32;
-  test = 1ULL <<33;
-  val = 0;
-
-
+  jtagIOInit();
+  loadJtagIR(0b111111111, 9);
+  val = jtagWriteAndReadBits(0b1110001,9);
+  jtagIOInit();
   //val = jtagBypass(0x0, 9);
 
   /* USER CODE END 2 */
