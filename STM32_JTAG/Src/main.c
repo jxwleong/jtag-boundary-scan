@@ -41,6 +41,7 @@
 #include "stm32f1xx_hal.h"
 
 /* USER CODE BEGIN Includes */
+#include <stdint.h>
 #include "Tap.h"
 #include "TAP_LookUpTable.h"
 #include "global.h"
@@ -360,7 +361,7 @@ int jtagWriteAndReadBit(int data, int tms){
 uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
-	int tdoData = 0;
+	uint64_t tdoData = 0;
 	int i = 0;
 	int n = 0;
 	uint64_t outData = 0;
@@ -388,53 +389,6 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
     Count++;
 	return outData;
 }
-
-
-data64bit WriteAndReadBits(uint64_t data, int length){
-	int dataMask = 1;
-	int oneBitData = 0;
-	int tdoData = 0;
-	int i = 0;
-	int n = 0;
-	data64bit outData;
-
-	// noted that last bit of data must be set at next tap state
-	for (n = length ; n > 1; n--) {
-	  oneBitData = dataMask & data;
-	  tdoData = jtagWriteAndReadBit(oneBitData, 0);
-	  currentTapState = updateTapState(currentTapState, 0);
-      tdo |= tdoData << (Count*1);
-      if(n>31)
-    	  outData.lowerNibble |= tdoData << (i*1);
-      else{
-    	  i = 0;
-    	  outData.upperNibble |= tdoData << (i*1);
-      }
-
-      tms |= 0 << (Count*1);
-      tdi |= oneBitData << (Count*1);
-      Count++;
-	  data = data >> 1;
-	  i++;
-	}
-	oneBitData = dataMask & data;
-	tdoData = jtagWriteAndReadBit(oneBitData, 1);
-	currentTapState = updateTapState(currentTapState, 1);
-	tdo |= tdoData << (Count*1);
-    if(n>31)
-  	  outData.lowerNibble |= tdoData << (i*1);
-    else{
-   	  i = 0;
-   	  outData.upperNibble |= tdoData << (i*1);
-     }
-	tdi |= oneBitData << (Count*1);
-    tms |= 1 << (Count*1);
-    Count++;
-	return outData;
-}
-
-
-
 
 void loadJtagIR(int instructionCode, int length){
   resetTapState();
@@ -495,6 +449,7 @@ int main(void)
 	volatile uint64_t val = 0;
 	volatile data64bit IdCode;
 	int i = 0;
+	uint64_t test;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -556,10 +511,7 @@ int main(void)
   val = 0;
   */
 
-  resetTapState();
-  	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
-  	IdCode = WriteAndReadBits(0xffffffffffffffff, 64);
-  	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+
 
   val = jtagReadIDCodeResetTAP();
   val = 0;
@@ -568,7 +520,13 @@ int main(void)
 	  	  			0b00, 2);
   val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_INSTRUCTION_LENGTH, \
 		  	  	  	0b1110001, 9);
+
+  test = 1ULL <<31;
+  test = 1ULL <<32;
+  test = 1ULL <<33;
   val = 0;
+
+
   //val = jtagBypass(0x0, 9);
 
   /* USER CODE END 2 */
