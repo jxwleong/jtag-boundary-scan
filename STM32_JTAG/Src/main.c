@@ -45,6 +45,8 @@
 #include "Tap.h"
 #include "TAP_LookUpTable.h"
 #include "global.h"
+#include "BoundaryScan.h"
+//#include "BoundaryScan.c"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -207,7 +209,7 @@ uint32_t Count = 0;
 
 TapState currentTapState = TEST_LOGIC_RESET;
 
-
+BSReg pa12;
 
 /* USER CODE END PV */
 
@@ -221,6 +223,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+// Instruction MACROs
 #define CORTEX_M3_JTAG_INSTRUCTION_LENGTH	9
 #define BYPASS_BOTH_TAP		0b111111111
 #define READ_BOTH_IDCODE	0b000011110
@@ -228,13 +231,19 @@ static void MX_GPIO_Init(void);
 #define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
 #define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
 
+// Boundary Scan MACROs
+#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH		232
+#define BOUNDARY_SCAN_CELL_DIV_64				CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH/64
+
+// Miscellaneous MACROs
 #define DUMMY_DATA			0x0
 
+
+// HAL GPIO MACROs
 #define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
 #define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
 #define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
 #define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-
 
 
 void jtagDelay(uint32_t cycles){
@@ -380,8 +389,8 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 }
 
 
-void loadJtagIR(int instructionCode, int length){
-	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
+void loadJtagIR(int instructionCode, int length, TapState start){
+	tapTravelFromTo(start, SHIFT_IR);
 	jtagWriteAndReadBits(instructionCode, length);
 	tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
@@ -397,19 +406,19 @@ uint64_t jtagWriteAndRead(uint64_t data, int length){
 
 uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLength){
 	uint64_t valRead = 0;
-	loadJtagIR(instruction, instructionLength);
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
 	valRead = jtagWriteAndRead(data,dataLength);
 	return valRead;
 }
 
 void loadBypassRegister(int instruction, int instructionLength, int data, int dataLength){
-	loadJtagIR(instruction, instructionLength);
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
 	jtagWriteAndRead(data, dataLength);
 }
 
 uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, int dataLength){
 	uint64_t valRead = 0;
-	loadJtagIR(instructionCode, instructionLength);
+	loadJtagIR(instructionCode, instructionLength, RUN_TEST_IDLE);
 	valRead = jtagWriteAndRead(data, dataLength);
 	return valRead;
 }
