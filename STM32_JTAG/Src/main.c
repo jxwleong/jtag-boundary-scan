@@ -209,7 +209,6 @@ uint32_t Count = 0;
 
 TapState currentTapState = TEST_LOGIC_RESET;
 
-BSReg pa12;
 
 /* USER CODE END PV */
 
@@ -231,12 +230,10 @@ static void MX_GPIO_Init(void);
 #define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
 #define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
 
-// Boundary Scan MACROs
-#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH		232
-#define BOUNDARY_SCAN_CELL_DIV_64				CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH/64
+
 
 // Miscellaneous MACROs
-#define DUMMY_DATA			0x0
+#define DUMMY_DATA			0x1234abcd
 
 
 // HAL GPIO MACROs
@@ -388,6 +385,46 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	return outData;
 }
 
+void jtagWriteAndReadBSCells(BSCell bSC, int length){
+	int dataMask = 1;
+	int oneBitData = 0;
+	uint64_t tdoData = 0;
+	int i = 0;
+	int n = 0;
+
+	// noted that last bit of data must be set at next tap state
+	for (n = length ; n > 1; n--) {
+	  oneBitData = dataMask & bSC.bSCellWriteData[i/64];
+	  tdoData = jtagClkIoTms(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
+	  // DIV by 64 to get the index for uint64_t array
+	  bSC.bSCellReadData[i/64] |= tdoData << (i*1);
+	  bSC.bSCellWriteData[i/64] = bSC.bSCellReadData[i/64] >> 1;
+	  i++;
+	}
+	oneBitData = dataMask & bSC.bSCellWriteData[i/64];
+	tdoData = jtagClkIoTms(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
+	bSC.bSCellReadData[i/64] |= tdoData << (i*1);;
+}
+
+int getSubtractNumber(int inputCellNum){
+	if(inputCellNum < 64)
+		return 0;
+	else  if(inputCellNum < 128)
+		return 64;
+	else if(inputCellNum < 192)
+		return 192;
+	else
+		return 256;
+}
+
+int jtagReadBSRegInput(BSCell bSC, BSReg bSReg){
+	int bSRegInput = 0;
+	int arrayIndex = (bSReg.inputCellNum)/ 64;
+	bSRegInput = (bSC.bSCellReadData[arrayIndex])>> bSReg.inputCellNum - (getSubtractNumber(bSReg.inputCellNum));
+	return bSRegInput;
+}
 
 void loadJtagIR(int instructionCode, int length, TapState start){
 	tapTravelFromTo(start, SHIFT_IR);
