@@ -230,11 +230,11 @@ static void MX_GPIO_Init(void);
 #define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
 #define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
 
-
+#define EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
 
 // Miscellaneous MACROs
 #define DUMMY_DATA			0x1234abcd
-
+#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
 
 // HAL GPIO MACROs
 #define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
@@ -422,7 +422,7 @@ int getSubtractNumber(int inputCellNum){
 int jtagReadBSRegInput(BSCell bSC, BSReg bSReg){
 	int bSRegInput = 0;
 	int arrayIndex = (bSReg.inputCellNum)/ 64;
-	bSRegInput = (bSC.bSCellReadData[arrayIndex])>> bSReg.inputCellNum - (getSubtractNumber(bSReg.inputCellNum));
+	bSRegInput = (bSC.bSCellReadData[arrayIndex])>> (bSReg.inputCellNum - (getSubtractNumber(bSReg.inputCellNum)));
 	return bSRegInput;
 }
 
@@ -483,6 +483,8 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
 	int i = 0;
+	BSCell bsc1;
+	BSReg pb9 = {6, 7, 8};
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -565,6 +567,14 @@ int main(void)
 	  val = jtagReadIdCode(BYPASS_BSC_TAP_READ_M3_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
 	  val = 0;
 
+	  /*	Read PB9 input pin
+	   */
+	  loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	  jtagWriteAndReadBSCells(bsc1, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+	  val = jtagReadBSRegInput(bsc1, pb9);
+	  val = 0;
 
   /* USER CODE END WHILE */
 
