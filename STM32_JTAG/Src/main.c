@@ -231,7 +231,8 @@ static void MX_GPIO_Init(void);
 #define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
 #define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
 
-#define EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
+#define SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
+#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0B000001111
 
 // Miscellaneous MACROs
 #define DUMMY_DATA			0x1234abcd
@@ -428,6 +429,7 @@ uint64_t jtagReadIDCodeResetTAP(int data, int dataLength){
 	return valRead;
 }
 
+// reset the array to 0
 void bSCInIt(volatile BSCell *bSC){
 	  int i = 0;
 
@@ -437,6 +439,8 @@ void bSCInIt(volatile BSCell *bSC){
 		  i++;
 	  }
 }
+
+// Read and Write the Boundary Scan Cell at the same time
 void jtagWriteAndReadBSCells(volatile BSCell *bSC, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
@@ -477,27 +481,19 @@ int jtagReadBSRegInput(volatile BSCell *bSC, BSReg bSReg){
 	return bSRegInput;
 }
 
-int jtagReadBSCPin(volatile BSCell *bSC, int pin){
+int jtagReadBSCPin(volatile BSCell *bSC, int pin, BSCDataType bSCDataType){
 	int bSRegInput = 0;
 	int mask = 1;
 
 	int arrayIndex = pin/ 8;
-	bSRegInput = ((bSC->bSCellSampleData[arrayIndex])) >> (pin%8);
+	if(bSCDataType == SAMPLE_DATA)
+		bSRegInput = ((bSC->bSCellSampleData[arrayIndex])) >> (pin%8);
+	else if(bSCDataType == PRELOAD_DATA)
+		bSRegInput = ((bSC->bSCellPreloadData[arrayIndex])) >> (pin%8);
+
 	bSRegInput &= mask;
 	return bSRegInput;
 }
-/*
-int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
-	int val = 0;
-
-	loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
-	// sample boundary scan cell
-	tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
-	jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
-	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
-	val = jtagReadBSRegInput(bSC, bSReg);
-	return val;
-}*/
 
 void sampleBSC(volatile BSCell *bSC){
 	tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
@@ -508,13 +504,33 @@ void sampleBSC(volatile BSCell *bSC){
 int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
 	int val = 0;
 
-	loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
 	sampleBSC(bSC);
 	val = jtagReadBSRegInput(bSC, bSReg);
 	return val;
 
 }
 
+
+void writePreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
+	int arrayIndex = (bSReg.outputCellNum)/ 8;
+	bSC->bSCellPreloadData[arrayIndex]  =  bSC->bSCellPreloadData[arrayIndex] | (data << (bSReg.outputCellNum % 8));
+}
+
+
+
+void bSCPreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
+	  writePreloadData(bSC, bSReg, data);
+	  loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	  jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+}
+
+void bSCExtestGpioPin(volatile BSCell *bSC, BSReg bSReg, int data){
+	  bSCPreloadData(bSC, bSReg, data);
+	  loadJtagIR(EXTEST_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+}
 
 /* USER CODE END 0 */
 
@@ -572,7 +588,7 @@ int main(void)
 	   * 	TDI : 	0b1110001		0b		0b
 	   * 			--------------> ------> ----> 	TDO
 	   * 	Expect result from TDO is 0b111000100	(LSB first)
-	   */
+	   * */
 	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b1110001, 10);
 	  val = 0;
 
@@ -587,7 +603,7 @@ int main(void)
 	   *
 	   *	Expect result from TDO is 0x164100413ba00477
 	   * */
-	  val = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA,64);
+	  val = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
 	  val = 0;
 
 	  /*	Get IDCODE after reset TAP state to TEST_LOGIC_RESET
@@ -613,13 +629,38 @@ int main(void)
 	  val = jtagReadIdCode(BYPASS_BSC_TAP_READ_M3_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
 	  val = 0;
 
-	  /*	Read PA12 input pin
-	   */
+	  /*	SAMPLE Instruction
+	   * 	Sample the Gpio pin while the MCU is running in normal operation
+	   *
+	   * 	Example
+	   * 	When pin pa12 is connected to GND the expected val is 0,
+	   * 	if pin pa12 is connected to 3.3V the expected val is 1
+	   * */
 	  bSCInIt(&bsc1);
 	  val = 0;
 	  val = bSCSampleGpioPin(&bsc1, pa12);
 	  val = 0;
 	  val = bSCSampleGpioPin(&bsc1, pb9);
+	  /*	PRELOAD Instruction
+	   * 	Loaded the test pattern that will use for EXTEST later
+	   *
+	   * 	Example
+	   *	Load '1' at the output cell of pb9 (tri-stated).
+	   *	When loading EXTEST instruction, pb9 will output HIGH '1'
+	   *
+	   * */
+	  writePreloadData(&bsc1, pa12, 1);
+	  val = jtagReadBSCPin(&bsc1, pa12.outputCellNum, PRELOAD_DATA);
+	  val = 0;
+
+	  /*	EXTEST Instruction
+	   * 	Apply the test pattern preloaded from PRELOAD Instruction
+	   * 	to the circuit
+	   * */
+	 bSCExtestGpioPin(&bsc1, pb6, 1);
+	 bSCExtestGpioPin(&bsc1, pb6, 0);
+	 bSCExtestGpioPin(&bsc1, pb6, 1);
+
 
   /* USER CODE END WHILE */
 
