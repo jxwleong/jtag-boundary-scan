@@ -53,6 +53,20 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+typedef enum{
+	OUTPUT_PIN = 0,
+	INPUT_PIN = 1,
+}BSCPinMode;
+
+typedef enum{
+	BYPASS,
+	IDCODE,
+	SAMPLE_PRELOAD,
+	EXTEST,
+	DONT_CARE,
+}JTAGInstruction;
+
 StateTable stateTable[16][16] = {
   // current state is TEST_LOGIC_RESET
   {{1, TEST_LOGIC_RESET}, {0, RUN_TEST_IDLE}, {0, RUN_TEST_IDLE},
@@ -208,7 +222,7 @@ uint64_t tdo = 0;
 uint32_t Count = 0;
 
 TapState currentTapState = TEST_LOGIC_RESET;
-
+JTAGInstruction currentIR = DONT_CARE;
 volatile BSCell bsc1;
 
 /* USER CODE END PV */
@@ -232,7 +246,7 @@ static void MX_GPIO_Init(void);
 #define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
 
 #define SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
-#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0B000001111
+#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0b000001111
 
 // Miscellaneous MACROs
 #define DUMMY_DATA			0x1234abcd
@@ -511,6 +525,10 @@ int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
 
 }
 
+void bSCPinConfigure(volatile BSCell *bSC, BSReg bSReg, BSCPinMode pinMode){
+	int arrayIndex = (bSReg.controlCellNum)/ 8;
+	bSC->bSCellPreloadData[arrayIndex]  =  bSC->bSCellPreloadData[arrayIndex] | (pinMode << (bSReg.controlCellNum % 8));
+}
 
 void writePreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
 	int arrayIndex = (bSReg.outputCellNum)/ 8;
@@ -521,7 +539,9 @@ void writePreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
 
 void bSCPreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
 	  writePreloadData(bSC, bSReg, data);
+	  if(currentIR != EXTEST){
 	  loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	  }
 	  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
 	  jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
 	  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
@@ -529,7 +549,14 @@ void bSCPreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
 
 void bSCExtestGpioPin(volatile BSCell *bSC, BSReg bSReg, int data){
 	  bSCPreloadData(bSC, bSReg, data);
-	  loadJtagIR(EXTEST_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	  if(currentIR != EXTEST){
+		  loadJtagIR(EXTEST_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+		  jtagSetIr(EXTEST);
+	  }
+}
+
+void jtagSetIr(JTAGInstruction instruction){
+	currentIR = instruction;
 }
 
 /* USER CODE END 0 */
@@ -543,9 +570,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
-	volatile uint64_t i = 1;
-	volatile uint64_t j = 0;
-	j = i << (i *63);
 
   /* USER CODE END 1 */
 
@@ -637,10 +661,8 @@ int main(void)
 	   * 	if pin pa12 is connected to 3.3V the expected val is 1
 	   * */
 	  bSCInIt(&bsc1);
-	  val = 0;
+	  bSCPinConfigure(&bsc1, pa12, INPUT_PIN);
 	  val = bSCSampleGpioPin(&bsc1, pa12);
-	  val = 0;
-	  val = bSCSampleGpioPin(&bsc1, pb9);
 	  /*	PRELOAD Instruction
 	   * 	Loaded the test pattern that will use for EXTEST later
 	   *
@@ -651,15 +673,23 @@ int main(void)
 	   * */
 	  writePreloadData(&bsc1, pa12, 1);
 	  val = jtagReadBSCPin(&bsc1, pa12.outputCellNum, PRELOAD_DATA);
-	  val = 0;
 
 	  /*	EXTEST Instruction
 	   * 	Apply the test pattern preloaded from PRELOAD Instruction
 	   * 	to the circuit
+	   *
+	   * 	NOTICE : Make sure the currentIR is not EXTEST for first time
+	   * 			 then update the currentIR to EXTEST
 	   * */
-	 bSCExtestGpioPin(&bsc1, pb6, 1);
-	 bSCExtestGpioPin(&bsc1, pb6, 0);
-	 bSCExtestGpioPin(&bsc1, pb6, 1);
+	 bSCPinConfigure(&bsc1, pa9, OUTPUT_PIN);
+	 bSCExtestGpioPin(&bsc1, pa9, 1);
+	 bSCExtestGpioPin(&bsc1, pa9, 0);
+	 bSCExtestGpioPin(&bsc1, pa9, 1);
+	 bSCExtestGpioPin(&bsc1, pa9, 1);
+	 bSCExtestGpioPin(&bsc1, pa9, 1);
+	 bSCExtestGpioPin(&bsc1, pa9, 0);
+	 bSCExtestGpioPin(&bsc1, pa9, 0);
+	 bSCExtestGpioPin(&bsc1, pa9, 0);
 
 
   /* USER CODE END WHILE */
