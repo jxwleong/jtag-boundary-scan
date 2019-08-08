@@ -38,7 +38,6 @@ struct JtagState{
   JtagOperation operation;
 };
 
-
 typedef struct TapSequence TapSequence;
 struct TapSequence{
   TapState state;
@@ -47,15 +46,12 @@ struct TapSequence{
   int bits;
 };
 
-
-
 typedef struct TapTestTable TapTestTable;
 struct TapTestTable{
   TapState currentState;
   TapState nextState_tms0;
   TapState nextState_tms1;
 };
-
 
 void tapTestLogicReset();
 char *getTapStateName(TapState tapState);

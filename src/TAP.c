@@ -42,8 +42,6 @@ TapState getCurrentState(JtagState currentState){
 }*/
 
 
-
-
 /*  @param current TAP State and current TMS state
     @desc  Reset to TEST_LOGIC_RESET state no matter
             current state.
@@ -97,8 +95,6 @@ uint64_t tapReadBits(int length){
   }
   return data;
 }
-
-
 
 void loadInstructionRegister(uint64_t data, int length){
   //tapTestLogicReset();

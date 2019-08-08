@@ -1,11 +1,6 @@
-#ifndef _BOUNDARYSCAN_H
-#define _BOUNDARYSCAN_H
+#ifndef _BOUDARYSCAN_H
+#define _BOUDARYSCAN_H
 
-
-
-// Boundary Scan MACROs
-#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH		232
-#define BOUNDARY_SCAN_CELL_DIV_8				CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH/8
 
 typedef struct BSReg BSReg;
 struct BSReg{
@@ -16,8 +11,8 @@ struct BSReg{
 
 typedef struct BSCell BSCell;
 struct BSCell{
-	uint8_t bSCellSampleData[BOUNDARY_SCAN_CELL_DIV_8 + 1];
-	uint8_t bSCellPreloadData[BOUNDARY_SCAN_CELL_DIV_8 + 1];
+	uint64_t bSCellReadData[BOUNDARY_SCAN_CELL_DIV_64 + 1];
+	uint64_t bSCellWriteData[BOUNDARY_SCAN_CELL_DIV_64 + 1];
 };
 
 /*
@@ -66,4 +61,4 @@ BSReg pc13 = {214, 215, 216};
 BSReg oscOutPD1 = {202, 203, 204};
 BSReg oscOutPD0 = {205, 206, 207};
 
-#endif // _BOUNDARYSCAN_H
+#endif // _BOUDARYSCAN_H

@@ -209,6 +209,7 @@ uint32_t Count = 0;
 
 TapState currentTapState = TEST_LOGIC_RESET;
 
+volatile BSCell bsc1;
 
 /* USER CODE END PV */
 
@@ -385,44 +386,53 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	return outData;
 }
 
-void jtagWriteAndReadBSCells(BSCell bSC, int length){
+void jtagWriteAndReadBSCells(volatile BSCell *bSC, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
-	uint64_t tdoData = 0;
-	int i = 0;
+	volatile uint64_t tdoData = 0;
+	uint64_t i = 0;
 	int n = 0;
+	int count = 0;
 
+	// get rid of bypass bit for CORTEX M3 TAP
+	tdoData = jtagClkIoTms(oneBitData, 0);
 	// noted that last bit of data must be set at next tap state
 	for (n = length ; n > 1; n--) {
-	  oneBitData = dataMask & bSC.bSCellWriteData[i/64];
+	  oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
 	  tdoData = jtagClkIoTms(oneBitData, 0);
 	  currentTapState = updateTapState(currentTapState, 0);
 	  // DIV by 64 to get the index for uint64_t array
-	  bSC.bSCellReadData[i/64] |= tdoData << (i*1);
-	  bSC.bSCellWriteData[i/64] = bSC.bSCellReadData[i/64] >> 1;
+	  (bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);;
+	  (bSC->bSCellPreloadData[count/8]) = bSC->bSCellPreloadData[count/8] >> 1;
 	  i++;
+		if(i%8 == 0)
+			i = 0;
+	  count++;
 	}
-	oneBitData = dataMask & bSC.bSCellWriteData[i/64];
+	oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
 	tdoData = jtagClkIoTms(oneBitData, 1);
 	currentTapState = updateTapState(currentTapState, 1);
-	bSC.bSCellReadData[i/64] |= tdoData << (i*1);;
+	(bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);
 }
 
-int getSubtractNumber(int inputCellNum){
-	if(inputCellNum < 64)
-		return 0;
-	else  if(inputCellNum < 128)
-		return 64;
-	else if(inputCellNum < 192)
-		return 192;
-	else
-		return 256;
-}
 
-int jtagReadBSRegInput(BSCell bSC, BSReg bSReg){
+int jtagReadBSRegInput(volatile BSCell *bSC, BSReg bSReg){
 	int bSRegInput = 0;
-	int arrayIndex = (bSReg.inputCellNum)/ 64;
-	bSRegInput = (bSC.bSCellReadData[arrayIndex])>> (bSReg.inputCellNum - (getSubtractNumber(bSReg.inputCellNum)));
+	int mask = 1;
+
+	int arrayIndex = (bSReg.inputCellNum)/ 8;
+	bSRegInput = (bSC->bSCellSampleData[arrayIndex]) >> (bSReg.inputCellNum %8);
+	bSRegInput &= mask;
+	return bSRegInput;
+}
+
+int jtagReadBSCPin(volatile BSCell *bSC, int pin){
+	int bSRegInput = 0;
+	int mask = 1;
+
+	int arrayIndex = pin/ 8;
+	bSRegInput = ((bSC->bSCellSampleData[arrayIndex])) >> (pin%8);
+	bSRegInput &= mask;
 	return bSRegInput;
 }
 
@@ -431,7 +441,6 @@ void loadJtagIR(int instructionCode, int length, TapState start){
 	jtagWriteAndReadBits(instructionCode, length);
 	tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
-
 
 uint64_t jtagWriteAndRead(uint64_t data, int length){
   uint64_t outData = 0;
@@ -460,7 +469,6 @@ uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, in
 	return valRead;
 }
 
-
 uint64_t jtagReadIDCodeResetTAP(int data, int dataLength){
 	uint64_t valRead = 0;
 	resetTapState();
@@ -470,7 +478,38 @@ uint64_t jtagReadIDCodeResetTAP(int data, int dataLength){
 	return valRead;
 }
 
+void bSCInIt(volatile BSCell *bSC){
+	  int i = 0;
 
+	  while(i < BOUNDARY_SCAN_CELL_DIV_8){
+		  bSC->bSCellPreloadData[i] = 0x00000000;
+		  bSC->bSCellSampleData[i] = 0x00000000;
+		  i++;
+	  }
+}
+
+void sampleBSC(volatile BSCell *bSC){
+	tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+}
+
+/*
+int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
+	int val = 0;
+
+	loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	val = jtagReadBSRegInput(&bsc1, bSReg);
+	return val;
+
+}*/
+int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
+	loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	jtagWriteAndReadBSCells(&bsc1, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+	val = jtagReadBSRegInput(&bsc1, pa12);
+}
 /* USER CODE END 0 */
 
 /**
@@ -482,9 +521,10 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
-	int i = 0;
-	BSCell bsc1;
-	BSReg pb9 = {6, 7, 8};
+	volatile uint64_t i = 1;
+	volatile uint64_t j = 0;
+	j = i << (i *63);
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -527,7 +567,7 @@ int main(void)
 	   * 			--------------> ------> ----> 	TDO
 	   * 	Expect result from TDO is 0b111000100	(LSB first)
 	   */
-	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b11110011, 10);
+	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b1110001, 10);
 	  val = 0;
 
 	  /*	IDCODE Instruction
@@ -552,7 +592,7 @@ int main(void)
 
 	  /*	Get IDCODE for BS TAP and bypass Cortex TAP
 	   *	retval need to shift right by 1 bit bcoz of
-	   *	bypass bit
+	   *	bypass bit for Cortex TAP
 	   *
 	   *	Expect result from TDO is 0xXXXXXXXX16410041
 	   * */
@@ -569,11 +609,20 @@ int main(void)
 
 	  /*	Read PB9 input pin
 	   */
-	  loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
-	  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
-	  jtagWriteAndReadBSCells(bsc1, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+
+	  bSCInIt(&bsc1);
+	  //READ_BOTH_IDCODE
+	  //EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP
+		/**/loadJtagIR(EXTEST_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+		tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+		jtagWriteAndReadBSCells(&bsc1, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+		tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+		val = jtagReadBSRegInput(&bsc1, pa12);
+		val = 0;
+	  val = bSCSampleGpioPin(&bsc1, pa12);
+	  jtagWriteAndReadBSCells(&bsc1, 15);
 	  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
-	  val = jtagReadBSRegInput(bsc1, pb9);
+	  val = jtagReadBSRegInput(&bsc1, pb9);
 	  val = 0;
 
   /* USER CODE END WHILE */
