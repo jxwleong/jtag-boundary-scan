@@ -13,7 +13,7 @@
 
 
 
-BSRegwStr	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
+BSReg	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 		// GPIO_A
 		[PA0] = {.inputCellNum = 187, .outputCellNum =  188, .controlCellNum = 189, .pinName = "pa0"},
 		[PA1] = {.inputCellNum = 187, .outputCellNum =  185, .controlCellNum = 186, .pinName = "pa1"},
@@ -58,7 +58,7 @@ BSRegwStr	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 
 };
 
-BSRegwStr getBSRegFromTable(char *str){
+BSReg getBSRegFromTable(char *str){
 	for(int i = 0; i<NO_OF_BOUNDARY_SCAN_REG;i++){
 		if(!(strcasecmp(bSRegTable[i].pinName, str))){
 			return (bSRegTable[i]);

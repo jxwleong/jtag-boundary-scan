@@ -588,16 +588,20 @@ void uartTransmitBuffer(USARTRegs *uart, char *buffer){
 }
 
 void skipWhiteSpaces(char **str){
-
     while(**str == ' ')
         ++*str;
 }
 
+void bypassCharactersInStr(char **str, int length){
+	while(length != 0){
+		++*str;
+		length--;
+	}
+}
 
 
-/*
 BSReg getBSRegFromStr(char *str){
-    char BSRegInStr[BSCELL_STR_LENGTH];
+    char BSRegInStr[BSCELL_STR_LENGTH] = {0};
     int i = 0;
     // skip the blank spaces in string
     skipWhiteSpaces(&str);
@@ -608,13 +612,12 @@ BSReg getBSRegFromStr(char *str){
         i++;
     }
 
-    if(!(strcasecmp(BSRegInStr, "pa9")))
-        return pa9;
+    return (getBSRegFromTable(BSRegInStr));
 
-}*/
+}
 
 
-void commandLineOperation(char *commandStr){
+void commandLineOperation(volatile char *commandStr){
 	int i = 0;
 	if(!(strcasecmp(commandStr, "jtag idcode"))){
 		tempVal = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
@@ -623,11 +626,42 @@ void commandLineOperation(char *commandStr){
 		bSCID = tempVal>>32;
 		sprintf(tempBuffer, "Cortex M3 ID Code : 0x%X \nBoundary Scan Cell ID Code : 0x%X \n\n", cortexM3ID, bSCID);
 	}
-	//else if(!(strcasecmp(commandStr, "jtag sample")))
+
+	else if(strstr(commandStr, "jtag sample") != '\0'){
+		bypassCharactersInStr(&commandStr, 11);
+		BSReg BSReg = getBSRegFromStr(commandStr);
+		bSCInIt(&bsc1);
+		bSCPinConfigure(&bsc1, BSReg, INPUT_PIN);
+		sprintf(tempBuffer, "Current value for pin %s is %i\n\n", BSReg.pinName, bSCSampleGpioPin(&bsc1, BSReg));
+	}
+	//else if(!(strcasecmp(commandStr, "jtag idcode")))
 	uartTransmitBuffer(uart1, tempBuffer);
 
 }
 
+
+void uartTransmitAndReceive(USARTRegs *uart, char buffer[]){
+	int i = 0;
+	restart:
+	  if(usartIsRxRegNotEmpty(uart)){
+		  buffer[i] = (uart)->DR;
+		  if(usartIsTxRegEmpty(uart)){
+			  (uart)->DR = buffer[i];
+		  }
+		  if(buffer[i] == '\b'){
+			  // check for backspace
+			  i--;
+			  goto restart;
+		  }
+		  if(buffer[i] == '\n'){
+			  buffer[i] = '\0';
+			  commandLineOperation(buffer);
+			  goto restart;
+		  }
+		  i++;
+
+  }
+}
 
 
 /* USER CODE END 0 */
@@ -643,8 +677,10 @@ int main(void)
 	volatile uint64_t val = 0, i = 0;
 	sprintf( menuBuffer, "\t\tWelcome to JTAG Interface for STM32F103C8T6, \n \t\t\t type 'help' for enquiry \n\n");
 	BSReg *bSGPtr;
-	BSRegwStr BSReg;
-	BSReg = getBSRegFromTable("PA0");
+	BSReg BSReg = getBSRegFromStr("       pa9");
+	char *msg = "abcdeg123";
+	bypassCharactersInStr(&msg, 5);
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -760,13 +796,15 @@ int main(void)
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
-   	//uartTransmitBuffer(uart1, menuBuffer);
+  	 uartTransmitBuffer(uart1, menuBuffer);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  restart:
 	  		  if(usartIsRxRegNotEmpty(uart1)){
 	  			  commandBuffer[i] = (uart1)->DR;
@@ -785,8 +823,8 @@ int main(void)
 	  				  goto restart;
 	  			  }
 	  			  i++;
-
 	  	  }
+	  //uartTransmitAndReceive(uart1, commandBuffer);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

@@ -5,6 +5,8 @@
  *      Author: user
  */
 
+#include "BoundaryScan.h"
+
 #ifndef BSREG_TABLE_H_
 #define BSREG_TABLE_H_
 
@@ -25,17 +27,9 @@ typedef enum{
 	oscOutPD1,
 }BSRegPin;
 
-typedef struct BSRegwStr BSRegwStr;
-struct BSRegwStr{
-	int inputCellNum;
-	int outputCellNum;
-	int controlCellNum;
-	char *pinName;
-};
 
 
 
-
-BSRegwStr getBSRegFromTable(char *str);
+BSReg getBSRegFromTable(char *str);
 
 #endif /* BSREG_TABLE_H_ */

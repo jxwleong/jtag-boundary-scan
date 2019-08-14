@@ -1,7 +1,7 @@
 #ifndef _BOUNDARYSCAN_H
 #define _BOUNDARYSCAN_H
 
-
+#include <stdint.h>
 
 // Boundary Scan MACROs
 #define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH		232
@@ -17,7 +17,10 @@ struct BSReg{
 	int inputCellNum;
 	int outputCellNum;
 	int controlCellNum;
+	char *pinName;
 };
+
+
 
 typedef struct BSCell BSCell;
 struct BSCell{
