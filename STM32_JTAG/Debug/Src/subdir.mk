@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Src/BSReg_Table.c \
 ../Src/CException.c \
 ../Src/Exception.c \
 ../Src/TAP.c \
@@ -17,6 +18,7 @@ C_SRCS += \
 ../Src/system_stm32f1xx.c 
 
 OBJS += \
+./Src/BSReg_Table.o \
 ./Src/CException.o \
 ./Src/Exception.o \
 ./Src/TAP.o \
@@ -30,6 +32,7 @@ OBJS += \
 ./Src/system_stm32f1xx.o 
 
 C_DEPS += \
+./Src/BSReg_Table.d \
 ./Src/CException.d \
 ./Src/Exception.d \
 ./Src/TAP.d \

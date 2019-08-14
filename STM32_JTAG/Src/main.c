@@ -47,6 +47,9 @@
 #include "global.h"
 #include "BoundaryScan.h"
 #include "USART.h"
+#include "BSReg_Def.h"
+#include "BSReg_Table.h"
+
 //#include "BoundaryScan.c"
 /* USER CODE END Includes */
 
@@ -254,8 +257,10 @@ uint32_t Count = 0;
 TapState currentTapState = TEST_LOGIC_RESET;
 JTAGInstruction currentIR = DONT_CARE;
 volatile BSCell bsc1;
-char tempBuffer[BUFFER_SIZE];
-char menuBuffer[BUFFER_SIZE];
+char tempBuffer[BUFFER_SIZE] = {0};
+char menuBuffer[BUFFER_SIZE] = {0};
+volatile char commandBuffer[BUFFER_SIZE] = {0};
+
 uint64_t tempVal = 0;
 
 /* USER CODE END PV */
@@ -590,12 +595,12 @@ void skipWhiteSpaces(char **str){
 
 
 
-
-BSReg *getBSRegFromStr(char *str){
+/*
+BSReg getBSRegFromStr(char *str){
     char BSRegInStr[BSCELL_STR_LENGTH];
     int i = 0;
     // skip the blank spaces in string
-    skipWhiteSpaces2(&str);
+    skipWhiteSpaces(&str);
 
     while(*str != ' ' && *str != '\0'){
         BSRegInStr[i] = *str;
@@ -604,9 +609,9 @@ BSReg *getBSRegFromStr(char *str){
     }
 
     if(!(strcasecmp(BSRegInStr, "pa9")))
-        return &pa9;
+        return pa9;
 
-}
+}*/
 
 
 void commandLineOperation(char *commandStr){
@@ -622,6 +627,9 @@ void commandLineOperation(char *commandStr){
 	uartTransmitBuffer(uart1, tempBuffer);
 
 }
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -633,10 +641,10 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0, i = 0;
-	volatile char commandBuffer[BUFFER_SIZE];
 	sprintf( menuBuffer, "\t\tWelcome to JTAG Interface for STM32F103C8T6, \n \t\t\t type 'help' for enquiry \n\n");
 	BSReg *bSGPtr;
-	bSGPtr = getBSRegFromStr("pa9");
+	BSRegwStr BSReg;
+	BSReg = getBSRegFromTable("PA0");
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -752,8 +760,7 @@ int main(void)
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
-   	uartTransmitBuffer(uart1, menuBuffer);
-   	bSGPtr = getBSRegFromStr("pa9");
+   	//uartTransmitBuffer(uart1, menuBuffer);
   /* USER CODE END 2 */
 
   /* Infinite loop */
