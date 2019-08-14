@@ -2,7 +2,11 @@
 #include <stdint.h>
 #include "USART.h"
 #include "common.h"
+#include "global.h"
+#include "BoundaryScan.h"
 
+//extern BSCell bsc1;
+//extern char tempBuffer;
 
 void usartConfigure(USARTRegs *usart, long long mode, int desiredBaudrate, int peripheralFreq){
 	int mantissa, fractional;
@@ -36,6 +40,17 @@ int usartOverSample16(USARTRegs *usart){
 	}
 	else{
 		return TRUE;
+	}
+}
+
+
+void uartTransmitBuffer(USARTRegs *uart, char *buffer){
+	int i = 0;
+	while(buffer[i] != '\0'){
+		if(usartIsTxRegEmpty(uart1)){
+			(uart1)->DR = buffer[i];
+			i++;
+		}
 	}
 }
 

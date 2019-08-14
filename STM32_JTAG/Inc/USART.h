@@ -217,5 +217,8 @@ struct USARTRegs{
 
 void usartConfigure(USARTRegs *usart, long long mode, int baudrate, int peripheralFreq);
 int usartOverSample16(USARTRegs *usart);
+void uartTransmitBuffer(USARTRegs *uart, char *buffer);
+/*void commandLineOperation(volatile char *commandStr);
+*/
 
 #endif /* __USART_H__ */

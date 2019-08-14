@@ -25,15 +25,12 @@ Src/main.o: ../Src/main.c \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/Tap.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP_LookUpTable.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP_Mock.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/global.h \
+ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/USART.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Def.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Table.h
+ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/main.h:
 
@@ -87,13 +84,9 @@ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc/st
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/Tap.h:
 
-C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP_LookUpTable.h:
+C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/global.h:
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP.h:
-
-C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/TAP_Mock.h:
-
-C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/global.h:
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h:
 
@@ -102,5 +95,3 @@ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/USART.h:
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Def.h:
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h:
-
-C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Table.h:

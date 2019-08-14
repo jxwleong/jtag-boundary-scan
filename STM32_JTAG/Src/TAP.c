@@ -4,7 +4,10 @@
 #include "TAP.h"
 #include "TAP_Mock.h"
 #include "global.h"
+#include "stm32f1xx_hal.h"
+#include "TAP_StateTable.h"
 
+extern TapState currentTapState;
 
 /*  @desc    return the name of TAP state in string instead of number(enum)
     @retval  TAP state in string
@@ -31,82 +34,156 @@ char *getTapStateName(TapState tapState){
   }
 }
 
-/*  @desc   return the current TAP state after funcion calls
-    @param  jtagState which contain the updated TAP state between
-            function calls
-    @retval Tapstate that keep updating between function calls
-*/
-/*
-TapState getCurrentState(JtagState currentState){
-  return currentState.state;
-}*/
-
-
-
-
 /*  @param current TAP State and current TMS state
     @desc  Reset to TEST_LOGIC_RESET state no matter
             current state.
 */
-void tapTestLogicReset(){
-  int i = 0;
 
-  while(i < 5){
-    tapStep(1, 0);// int tapStep(tms, tdi)
-    jtagState.state = getTapState(jtagState.state, 1);
-    i++;
-  }
+TapState updateTapState(TapState currentState, int tms){
+	TapState retval;
+      if(tms == 1)
+    	  retval =  (tapTrackTable[currentState].nextState_tms1);
+      else if(tms == 0)
+    	  retval =  (tapTrackTable[currentState].nextState_tms0);
+    return retval;
 }
 
 
-/*  @param the data desired to write and the length of the data
-    @desc  write the data into Data Register or Instruction Register
-           based on the TAP state (SHIFT_DR or SHIFT_IR)
-*/
-void tapWriteBits(uint64_t data, int length){
+/*
+ * Initialize all JTAG's input pin to zero
+ */
+void jtagIoInit(){
+	setClock(0);
+	setTms(0);
+	writeTdi(0);
+}
+
+/*
+ * Handle the TCK, TMS, TDI(data), and
+ * return value read at same CLK cycle.
+ */
+int jtagClkIoTms(int data, int tms){
+	int val = 0;
+
+	setClock(0);
+	setTms(tms);
+	writeTdi(data);
+	jtagDelay(500);
+	setClock(1);
+	val = readTdo();
+	jtagDelay(500);
+	return val;
+}
+
+/*
+ * Reset the TAP controller state to TEST_LOGIC_RESET
+ * state.
+ */
+void resetTapState(){
+	int i = 0;
+
+	 while(i < 5){
+	   jtagClkIoTms(0, 1);
+	   currentTapState = updateTapState(currentTapState, 1);
+	   i++;
+	 }
+}
+
+/*
+ * Transition of TAP state from parameter "start"
+ * to "end"
+ */
+void tapTravelFromTo(TapState start, TapState end){
+    int tmsRequired;
+
+      while(currentTapState != end){
+          tmsRequired = getTmsRequired(currentTapState, end);
+          jtagClkIoTms(0, tmsRequired);
+          currentTapState = updateTapState(currentTapState, tmsRequired);
+          }
+}
+
+void jtagWriteTms(uint64_t data, int length){
   int dataMask = 1;
   int oneBitData = 0;
-  int i = 0;
 
-  // noted that last bit of data must be set at next tap state
   while(length > 0){
     oneBitData = dataMask & data;
-    tapStep(0, oneBitData);
-    jtagState.DataReg |= oneBitData << (1*i);
+    jtagClkIoTms(0, oneBitData);
     length--;
     data = data >> 1;
-    i++;
   }
-  oneBitData = dataMask & data;
-  tapStep(1, oneBitData);
-  jtagState.DataReg |= oneBitData << (1*i);
 }
 
 
-/*  @param the length of read
-    @desc  Read the data
-*/
-uint64_t tapReadBits(int length){
-  int data;
-  int i = 0;
-
-  while(length > 0){
-    data |= (tapStep(0,0)) << i;
-    length--;
-    i++;
-  }
-  return data;
+void switchSwdToJtagMode(){
+	jtagWriteTms(0x3FFFFFFFFFFFF, 50);
+	jtagWriteTms(0xE73C, 16);
+	resetTapState();
 }
 
+uint64_t jtagWriteAndReadBits(uint64_t data, int length){
+	int dataMask = 1;
+	int oneBitData = 0;
+	uint64_t tdoData = 0;
+	int i = 0;
+	int n = 0;
+	uint64_t outData = 0;
 
-void loadInstructionRegister(uint64_t data, int length){
-  tapTestLogicReset();
-  jtagGoTo(jtagState, SHIFT_IR);
-  tapWriteBits(data, length);
+	// noted that last bit of data must be set at next tap state
+	for (n = length ; n > 1; n--) {
+	  oneBitData = dataMask & data;
+	  tdoData = jtagClkIoTms(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
+	  outData |= tdoData << (i*1);
+	  data = data >> 1;
+	  i++;
+	}
+	oneBitData = dataMask & data;
+	tdoData = jtagClkIoTms(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
+	outData |= tdoData << (i*1);;
+	return outData;
 }
 
-void loadDataRegister(uint64_t data, int length){
-  jtagGoTo(jtagState, SHIFT_DR);
-  tapWriteBits(data, length);
+void loadJtagIR(int instructionCode, int length, TapState start){
+	tapTravelFromTo(start, SHIFT_IR);
+	jtagWriteAndReadBits(instructionCode, length);
+	tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
 
+uint64_t jtagWriteAndRead(uint64_t data, int length){
+  uint64_t outData = 0;
+  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+  outData = jtagWriteAndReadBits(data, length);
+  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+  return outData;
+}
+
+uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLength){
+	uint64_t valRead = 0;
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
+	valRead = jtagWriteAndRead(data,dataLength);
+	return valRead;
+}
+
+void loadBypassRegister(int instruction, int instructionLength, int data, int dataLength){
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
+	jtagWriteAndRead(data, dataLength);
+}
+
+uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, int dataLength){
+	uint64_t valRead = 0;
+	loadJtagIR(instructionCode, instructionLength, RUN_TEST_IDLE);
+	valRead = jtagWriteAndRead(data, dataLength);
+	return valRead;
+}
+
+uint64_t jtagReadIDCodeResetTAP(int data, int dataLength){
+	uint64_t valRead = 0;
+	resetTapState();
+	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+	valRead = jtagWriteAndReadBits(data, dataLength);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+	return valRead;
+}

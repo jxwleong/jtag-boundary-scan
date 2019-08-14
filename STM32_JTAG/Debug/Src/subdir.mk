@@ -5,13 +5,16 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Src/BSReg_Table.c \
+../Src/BoundaryScan.c \
 ../Src/CException.c \
 ../Src/Exception.c \
 ../Src/TAP.c \
 ../Src/TAP_LookUpTable.c \
 ../Src/TAP_Mock.c \
 ../Src/USART.c \
+../Src/global.c \
 ../Src/main.c \
+../Src/myString.c \
 ../Src/stm32f1xx_hal_msp.c \
 ../Src/stm32f1xx_hal_timebase_TIM.c \
 ../Src/stm32f1xx_it.c \
@@ -19,13 +22,16 @@ C_SRCS += \
 
 OBJS += \
 ./Src/BSReg_Table.o \
+./Src/BoundaryScan.o \
 ./Src/CException.o \
 ./Src/Exception.o \
 ./Src/TAP.o \
 ./Src/TAP_LookUpTable.o \
 ./Src/TAP_Mock.o \
 ./Src/USART.o \
+./Src/global.o \
 ./Src/main.o \
+./Src/myString.o \
 ./Src/stm32f1xx_hal_msp.o \
 ./Src/stm32f1xx_hal_timebase_TIM.o \
 ./Src/stm32f1xx_it.o \
@@ -33,13 +39,16 @@ OBJS += \
 
 C_DEPS += \
 ./Src/BSReg_Table.d \
+./Src/BoundaryScan.d \
 ./Src/CException.d \
 ./Src/Exception.d \
 ./Src/TAP.d \
 ./Src/TAP_LookUpTable.d \
 ./Src/TAP_Mock.d \
 ./Src/USART.d \
+./Src/global.d \
 ./Src/main.d \
+./Src/myString.d \
 ./Src/stm32f1xx_hal_msp.d \
 ./Src/stm32f1xx_hal_timebase_TIM.d \
 ./Src/stm32f1xx_it.d \

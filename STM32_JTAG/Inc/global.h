@@ -4,6 +4,17 @@
 #include "TAP.h"
 #include "main.h"
 
+extern JtagState jtagState;
+
+typedef enum{
+	BYPASS,
+	IDCODE,
+	SAMPLE_PRELOAD,
+	EXTEST,
+	DONT_CARE,
+}JTAGInstruction;
+
+
 // Instruction MACROs
 #define CORTEX_M3_JTAG_INSTRUCTION_LENGTH	9
 #define BYPASS_BOTH_TAP		0b111111111
@@ -29,6 +40,8 @@
 #define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
 
 
-extern JtagState jtagState;
+
+void jtagSetIr(JTAGInstruction instruction);
+void jtagDelay(uint32_t cycles);
 
 #endif // _GLOBAL_H
