@@ -9,8 +9,10 @@ C_SRCS += \
 ../Src/TAP.c \
 ../Src/TAP_LookUpTable.c \
 ../Src/TAP_Mock.c \
+../Src/USART.c \
 ../Src/main.c \
 ../Src/stm32f1xx_hal_msp.c \
+../Src/stm32f1xx_hal_timebase_TIM.c \
 ../Src/stm32f1xx_it.c \
 ../Src/system_stm32f1xx.c 
 
@@ -20,8 +22,10 @@ OBJS += \
 ./Src/TAP.o \
 ./Src/TAP_LookUpTable.o \
 ./Src/TAP_Mock.o \
+./Src/USART.o \
 ./Src/main.o \
 ./Src/stm32f1xx_hal_msp.o \
+./Src/stm32f1xx_hal_timebase_TIM.o \
 ./Src/stm32f1xx_it.o \
 ./Src/system_stm32f1xx.o 
 
@@ -31,8 +35,10 @@ C_DEPS += \
 ./Src/TAP.d \
 ./Src/TAP_LookUpTable.d \
 ./Src/TAP_Mock.d \
+./Src/USART.d \
 ./Src/main.d \
 ./Src/stm32f1xx_hal_msp.d \
+./Src/stm32f1xx_hal_timebase_TIM.d \
 ./Src/stm32f1xx_it.d \
 ./Src/system_stm32f1xx.d 
 
@@ -42,7 +48,7 @@ Src/%.o: ../Src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft '-D__weak=__attribute__((weak))' '-D__packed=__attribute__((__packed__))' -DUSE_HAL_DRIVER -DSTM32F103xB -I"C:/Users/user/Desktop/JTAG_BoundaryScan/STM32_JTAG/Inc" -I"C:/Users/user/Desktop/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc" -I"C:/Users/user/Desktop/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" -I"C:/Users/user/Desktop/JTAG_BoundaryScan/STM32_JTAG/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -I"C:/Users/user/Desktop/JTAG_BoundaryScan/STM32_JTAG/Drivers/CMSIS/Include"  -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft '-D__weak=__attribute__((weak))' '-D__packed=__attribute__((__packed__))' -DUSE_HAL_DRIVER -DSTM32F103xB -I"C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc" -I"C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc" -I"C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" -I"C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -I"C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Drivers/CMSIS/Include"  -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

@@ -39,20 +39,46 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
-
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
+#include <string.h>
 #include "Tap.h"
 #include "TAP_LookUpTable.h"
 #include "global.h"
 #include "BoundaryScan.h"
+#include "USART.h"
 //#include "BoundaryScan.c"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+// Instruction MACROs
+#define CORTEX_M3_JTAG_INSTRUCTION_LENGTH	9
+#define BYPASS_BOTH_TAP		0b111111111
+#define READ_BOTH_IDCODE	0b000011110
+
+#define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
+#define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
+
+#define SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
+#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0b000001111
+
+// Miscellaneous MACROs
+#define DUMMY_DATA			0x1234abcd
+#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
+
+#define BUFFER_SIZE			128
+#define BSCELL_STR_LENGTH	16
+// HAL GPIO MACROs
+#define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
+#define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
+#define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
+#define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
+
 
 typedef enum{
 	OUTPUT_PIN = 0,
@@ -216,6 +242,10 @@ TapTestTable tapTrackTable[16] = {{TEST_LOGIC_RESET, RUN_TEST_IDLE, TEST_LOGIC_R
                              {EXIT2_IR, SHIFT_IR, UPDATE_IR},
                              {UPDATE_IR, RUN_TEST_IDLE, SELECT_DR_SCAN},
                            };
+
+
+
+
 uint64_t tms = 0;
 uint64_t tdi = 0;
 uint64_t tdo = 0;
@@ -224,12 +254,16 @@ uint32_t Count = 0;
 TapState currentTapState = TEST_LOGIC_RESET;
 JTAGInstruction currentIR = DONT_CARE;
 volatile BSCell bsc1;
+char tempBuffer[BUFFER_SIZE];
+char menuBuffer[BUFFER_SIZE];
+uint64_t tempVal = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -237,27 +271,6 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-// Instruction MACROs
-#define CORTEX_M3_JTAG_INSTRUCTION_LENGTH	9
-#define BYPASS_BOTH_TAP		0b111111111
-#define READ_BOTH_IDCODE	0b000011110
-
-#define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
-#define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
-
-#define SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
-#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0b000001111
-
-// Miscellaneous MACROs
-#define DUMMY_DATA			0x1234abcd
-#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
-
-// HAL GPIO MACROs
-#define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
-#define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
-#define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
-#define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-
 
 void jtagDelay(uint32_t cycles){
 	while(cycles--);
@@ -559,6 +572,56 @@ void jtagSetIr(JTAGInstruction instruction){
 	currentIR = instruction;
 }
 
+void uartTransmitBuffer(USARTRegs *uart, char *buffer){
+	int i = 0;
+	while(buffer[i] != '\0'){
+		if(usartIsTxRegEmpty(uart1)){
+			(uart1)->DR = buffer[i];
+			i++;
+		}
+	}
+}
+
+void skipWhiteSpaces(char **str){
+
+    while(**str == ' ')
+        ++*str;
+}
+
+
+
+
+BSReg *getBSRegFromStr(char *str){
+    char BSRegInStr[BSCELL_STR_LENGTH];
+    int i = 0;
+    // skip the blank spaces in string
+    skipWhiteSpaces2(&str);
+
+    while(*str != ' ' && *str != '\0'){
+        BSRegInStr[i] = *str;
+        str++;
+        i++;
+    }
+
+    if(!(strcasecmp(BSRegInStr, "pa9")))
+        return &pa9;
+
+}
+
+
+void commandLineOperation(char *commandStr){
+	int i = 0;
+	if(!(strcasecmp(commandStr, "jtag idcode"))){
+		tempVal = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
+		uint32_t bSCID = 0, cortexM3ID = 0;
+		cortexM3ID = tempVal & 0xffffffff;
+		bSCID = tempVal>>32;
+		sprintf(tempBuffer, "Cortex M3 ID Code : 0x%X \nBoundary Scan Cell ID Code : 0x%X \n\n", cortexM3ID, bSCID);
+	}
+	//else if(!(strcasecmp(commandStr, "jtag sample")))
+	uartTransmitBuffer(uart1, tempBuffer);
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -569,8 +632,11 @@ void jtagSetIr(JTAGInstruction instruction){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	volatile uint64_t val = 0;
-
+	volatile uint64_t val = 0, i = 0;
+	volatile char commandBuffer[BUFFER_SIZE];
+	sprintf( menuBuffer, "\t\tWelcome to JTAG Interface for STM32F103C8T6, \n \t\t\t type 'help' for enquiry \n\n");
+	BSReg *bSGPtr;
+	bSGPtr = getBSRegFromStr("pa9");
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -591,107 +657,129 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   switchSwdToJtagMode();
   jtagIoInit();
+
+  /*	Bypass Instruction
+  	   * 	Instruction op-code : 9 bit of 1
+  	   * 	1. Load the DR of Boundary Scan(BS) and Cortex TAP
+  	   * 	   with 1.
+  	   * 	2. Send data of 0b1110001 to shift out.
+  	   * 	3. Expected data is
+  	   *
+  	   * 							BS TAP  Cortex TAP
+  	   * 	TDI : 	0b1110001		0b		0b
+  	   * 			--------------> ------> ----> 	TDO
+  	   * 	Expect result from TDO is 0b111000100	(LSB first)
+  	   * */
+  	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b1110001, 10);
+  	  val = 0;
+
+  	  /*	IDCODE Instruction
+  	   * 	Instruction op-code : 0b000011110
+  	   *	1. Load the IR of Boundary Scan(BS) with 0b00001
+  	   *	   and Cortex TAP with 0b1110
+  	   *    2. Shift out the IDCODE from both TAP's DR.
+  	   *    3. Expected result is
+  	   *        			BS TAP		Cortex TAP
+  	   *	TDI : 		0x16410041		0x3ba00477(LSB)
+  	   *
+  	   *	Expect result from TDO is 0x164100413ba00477
+  	   * */
+  	  val = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
+  	  val = 0;
+
+  	  /*	Get IDCODE after reset TAP state to TEST_LOGIC_RESET
+  	   * 	Expect result from TDO is 0x164100413ba00477
+  	   * */
+  	  val = jtagReadIDCodeResetTAP(DUMMY_DATA, 64);
+  	  val = 0;
+
+  	  /*	Get IDCODE for BS TAP and bypass Cortex TAP
+  	   *	retval need to shift right by 1 bit bcoz of
+  	   *	bypass bit for Cortex TAP
+  	   *
+  	   *	Expect result from TDO is 0xXXXXXXXX16410041
+  	   * */
+  	  val = jtagReadIdCode(READ_BSC_IDCODE_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
+  	  val = val>>1;
+  	  val = 0;
+
+  	  /*	Bypass BS TAP and get IDCODE for Cortex TAP
+  	   *
+  	   * 	Expect result from TDO is 0xXXXXXXXX3ba00477
+  	   * */
+  	  val = jtagReadIdCode(BYPASS_BSC_TAP_READ_M3_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
+  	  val = 0;
+
+  	  /*	SAMPLE Instruction
+  	   * 	Sample the Gpio pin while the MCU is running in normal operation
+  	   *
+  	   * 	Example
+  	   * 	When pin pa12 is connected to GND the expected val is 0,
+  	   * 	if pin pa12 is connected to 3.3V the expected val is 1
+  	   * */
+  	  bSCInIt(&bsc1);
+  	  bSCPinConfigure(&bsc1, pa12, INPUT_PIN);
+  	  val = bSCSampleGpioPin(&bsc1, pa12);
+  	  /*	PRELOAD Instruction
+  	   * 	Loaded the test pattern that will use for EXTEST later
+  	   *
+  	   * 	Example
+  	   *	Load '1' at the output cell of pb9 (tri-stated).
+  	   *	When loading EXTEST instruction, pb9 will output HIGH '1'
+  	   *
+  	   * */
+  	  writePreloadData(&bsc1, pa12, 1);
+  	  val = jtagReadBSCPin(&bsc1, pa12.outputCellNum, PRELOAD_DATA);
+
+  	  /*	EXTEST Instruction
+  	   * 	Apply the test pattern preloaded from PRELOAD Instruction
+  	   * 	to the circuit
+  	   *
+  	   * 	NOTICE : Make sure the currentIR is not EXTEST for first time
+  	   * 			 then update the currentIR to EXTEST
+  	   * */
+  	 bSCPinConfigure(&bsc1, pa9, OUTPUT_PIN);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+   	uartTransmitBuffer(uart1, menuBuffer);
+   	bSGPtr = getBSRegFromStr("pa9");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  /*	Bypass Instruction
-	   * 	Instruction op-code : 9 bit of 1
-	   * 	1. Load the DR of Boundary Scan(BS) and Cortex TAP
-	   * 	   with 1.
-	   * 	2. Send data of 0b1110001 to shift out.
-	   * 	3. Expected data is
-	   *
-	   * 							BS TAP  Cortex TAP
-	   * 	TDI : 	0b1110001		0b		0b
-	   * 			--------------> ------> ----> 	TDO
-	   * 	Expect result from TDO is 0b111000100	(LSB first)
-	   * */
-	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b1110001, 10);
-	  val = 0;
+	  restart:
+	  		  if(usartIsRxRegNotEmpty(uart1)){
+	  			  commandBuffer[i] = (uart1)->DR;
+	  			  if(usartIsTxRegEmpty(uart1)){
+	  				  (uart1)->DR = commandBuffer[i];
+	  			  }
+	  			  if(commandBuffer[i] == '\b'){
+	  				  // check for backspace
+	  				  i--;
+	  				  goto restart;
+	  			  }
+	  			  if(commandBuffer[i] == '\n'){
+	  				  commandBuffer[i] = '\0';
+	  				  commandLineOperation(commandBuffer);
+	  				  i = 0;
+	  				  goto restart;
+	  			  }
+	  			  i++;
 
-	  /*	IDCODE Instruction
-	   * 	Instruction op-code : 0b000011110
-	   *	1. Load the IR of Boundary Scan(BS) with 0b00001
-	   *	   and Cortex TAP with 0b1110
-	   *    2. Shift out the IDCODE from both TAP's DR.
-	   *    3. Expected result is
-	   *        			BS TAP		Cortex TAP
-	   *	TDI : 		0x16410041		0x3ba00477(LSB)
-	   *
-	   *	Expect result from TDO is 0x164100413ba00477
-	   * */
-	  val = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
-	  val = 0;
-
-	  /*	Get IDCODE after reset TAP state to TEST_LOGIC_RESET
-	   * 	Expect result from TDO is 0x164100413ba00477
-	   * */
-	  val = jtagReadIDCodeResetTAP(DUMMY_DATA, 64);
-	  val = 0;
-
-	  /*	Get IDCODE for BS TAP and bypass Cortex TAP
-	   *	retval need to shift right by 1 bit bcoz of
-	   *	bypass bit for Cortex TAP
-	   *
-	   *	Expect result from TDO is 0xXXXXXXXX16410041
-	   * */
-	  val = jtagReadIdCode(READ_BSC_IDCODE_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
-	  val = val>>1;
-	  val = 0;
-
-	  /*	Bypass BS TAP and get IDCODE for Cortex TAP
-	   *
-	   * 	Expect result from TDO is 0xXXXXXXXX3ba00477
-	   * */
-	  val = jtagReadIdCode(BYPASS_BSC_TAP_READ_M3_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
-	  val = 0;
-
-	  /*	SAMPLE Instruction
-	   * 	Sample the Gpio pin while the MCU is running in normal operation
-	   *
-	   * 	Example
-	   * 	When pin pa12 is connected to GND the expected val is 0,
-	   * 	if pin pa12 is connected to 3.3V the expected val is 1
-	   * */
-	  bSCInIt(&bsc1);
-	  bSCPinConfigure(&bsc1, pa12, INPUT_PIN);
-	  val = bSCSampleGpioPin(&bsc1, pa12);
-	  /*	PRELOAD Instruction
-	   * 	Loaded the test pattern that will use for EXTEST later
-	   *
-	   * 	Example
-	   *	Load '1' at the output cell of pb9 (tri-stated).
-	   *	When loading EXTEST instruction, pb9 will output HIGH '1'
-	   *
-	   * */
-	  writePreloadData(&bsc1, pa12, 1);
-	  val = jtagReadBSCPin(&bsc1, pa12.outputCellNum, PRELOAD_DATA);
-
-	  /*	EXTEST Instruction
-	   * 	Apply the test pattern preloaded from PRELOAD Instruction
-	   * 	to the circuit
-	   *
-	   * 	NOTICE : Make sure the currentIR is not EXTEST for first time
-	   * 			 then update the currentIR to EXTEST
-	   * */
-	 bSCPinConfigure(&bsc1, pa9, OUTPUT_PIN);
-	 bSCExtestGpioPin(&bsc1, pa9, 1);
-	 bSCExtestGpioPin(&bsc1, pa9, 0);
-	 bSCExtestGpioPin(&bsc1, pa9, 1);
-	 bSCExtestGpioPin(&bsc1, pa9, 1);
-	 bSCExtestGpioPin(&bsc1, pa9, 1);
-	 bSCExtestGpioPin(&bsc1, pa9, 0);
-	 bSCExtestGpioPin(&bsc1, pa9, 0);
-	 bSCExtestGpioPin(&bsc1, pa9, 0);
-
-
+	  	  }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -715,11 +803,11 @@ void SystemClock_Config(void)
     */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV2;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL13;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -751,6 +839,25 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+/* USART1 init function */
+static void MX_USART1_UART_Init(void)
+{
+
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
 /** Configure pins as 
         * Analog 
         * Input 
@@ -764,6 +871,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct;
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -789,6 +897,27 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

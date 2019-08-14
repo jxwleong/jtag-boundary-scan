@@ -41,15 +41,33 @@
 #include "stm32f1xx_hal.h"
 
 /* USER CODE BEGIN Includes */
+#include <stdint.h>
 #include "Tap.h"
 #include "TAP_LookUpTable.h"
 #include "global.h"
+#include "BoundaryScan.h"
+//#include "BoundaryScan.c"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+typedef enum{
+	OUTPUT_PIN = 0,
+	INPUT_PIN = 1,
+}BSCPinMode;
+
+typedef enum{
+	BYPASS,
+	IDCODE,
+	SAMPLE_PRELOAD,
+	EXTEST,
+	DONT_CARE,
+}JTAGInstruction;
+
 StateTable stateTable[16][16] = {
   // current state is TEST_LOGIC_RESET
   {{1, TEST_LOGIC_RESET}, {0, RUN_TEST_IDLE}, {0, RUN_TEST_IDLE},
@@ -182,19 +200,38 @@ StateTable stateTable[16][16] = {
 
 };
 
+TapTestTable tapTrackTable[16] = {{TEST_LOGIC_RESET, RUN_TEST_IDLE, TEST_LOGIC_RESET},
+                             {RUN_TEST_IDLE, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                             {SELECT_DR_SCAN, CAPTURE_DR, SELECT_IR_SCAN},
+                             {CAPTURE_DR, SHIFT_DR, EXIT1_DR},
+                             {SHIFT_DR, SHIFT_DR, EXIT1_DR},
+                             {EXIT1_DR, PAUSE_DR, UPDATE_DR},
+                             {PAUSE_DR, PAUSE_DR, EXIT2_DR},
+                             {EXIT2_DR, SHIFT_DR, UPDATE_DR},
+                             {UPDATE_DR, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                             {SELECT_IR_SCAN, CAPTURE_IR, TEST_LOGIC_RESET},
+                             {CAPTURE_IR, SHIFT_IR, EXIT1_IR},
+                             {SHIFT_IR, SHIFT_IR, EXIT1_IR},
+                             {EXIT1_IR, PAUSE_IR, UPDATE_IR},
+                             {PAUSE_IR, PAUSE_IR, EXIT2_IR},
+                             {EXIT2_IR, SHIFT_IR, UPDATE_IR},
+                             {UPDATE_IR, RUN_TEST_IDLE, SELECT_DR_SCAN},
+                           };
 uint64_t tms = 0;
 uint64_t tdi = 0;
 uint64_t tdo = 0;
 uint32_t Count = 0;
-uint64_t jtagReadIDCode(){
-//uint32_t val;
-}
+
+TapState currentTapState = TEST_LOGIC_RESET;
+JTAGInstruction currentIR = DONT_CARE;
+volatile BSCell bsc1;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -202,27 +239,40 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+// Instruction MACROs
+#define CORTEX_M3_JTAG_INSTRUCTION_LENGTH	9
+#define BYPASS_BOTH_TAP		0b111111111
+#define READ_BOTH_IDCODE	0b000011110
+
+#define READ_BSC_IDCODE_BYPASS_M3_TAP	0b000011111
+#define BYPASS_BSC_TAP_READ_M3_IDCODE	0b111111110
+
+#define SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP	0b000101111
+#define EXTEST_BSC_TAP_BYPASS_M3_TAP			0b000001111
+
+// Miscellaneous MACROs
+#define DUMMY_DATA			0x1234abcd
+#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
+
+// HAL GPIO MACROs
+#define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
+#define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
+#define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
+#define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
+
 
 void jtagDelay(uint32_t cycles){
 	while(cycles--);
 }
 
 
-void setClock(int clk){
-	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
-}
-
-void setTdi(int tdi){
-	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
-}
-
-void setTms(int tms){
-	HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
-}
-
-int readTdo(){
-	int tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-	return tdo;
+TapState updateTapState(TapState currentState, int tms){
+	TapState retval;
+      if(tms == 1)
+    	  retval =  (tapTrackTable[currentState].nextState_tms1);
+      else if(tms == 0)
+    	  retval =  (tapTrackTable[currentState].nextState_tms0);
+    return retval;
 }
 
 void tckCycle(){
@@ -232,12 +282,20 @@ void tckCycle(){
 	jtagDelay(500);
 }
 
-void tdicycle(int tdi){
-	setTdi(tdi);
+void tdiCycle(int tdi){
+	writeTdi(tdi);
 	setClock(0);
 	jtagDelay(500);
 	setClock(1);
 	jtagDelay(500);
+}
+
+int tdoCycle(){
+	int val = 0;
+	setClock(0);
+	val = readTdo();
+	return val;
+
 }
 
 #define tdioCycle(tdi, tdo)	\
@@ -248,47 +306,59 @@ void tdicycle(int tdi){
 	jtagDelay(500);		\
 
 
-void jtagIOInit(){
-	 tms = 0;
-	 tdi = 0;
-	 tdo = 0;
-	 Count = 0;
+/*
+ * Initialize all JTAG's input pin to zero
+ */
+void jtagIoInit(){
+	setClock(0);
+	setTms(0);
+	writeTdi(0);
 }
 
+/*
+ * Handle the TCK, TMS, TDI(data), and
+ * return value read at same CLK cycle.
+ */
+int jtagClkIoTms(int data, int tms){
+	int val = 0;
+
+	setClock(0);
+	setTms(tms);
+	writeTdi(data);
+	jtagDelay(500);
+	setClock(1);
+	val = readTdo();
+	jtagDelay(500);
+	return val;
+}
+
+/*
+ * Reset the TAP controller state to TEST_LOGIC_RESET
+ * state.
+ */
 void resetTapState(){
 	int i = 0;
 
 	 while(i < 5){
-	   setTms(1);
-	   tckCycle();
-	   tms |= 1 << (Count*1);
-	   tdi |= 0 << (Count*1);
-	   tdo |= 0 << (Count*1);
-	   Count++;
+	   jtagClkIoTms(0, 1);
+	   currentTapState = updateTapState(currentTapState, 1);
 	   i++;
 	 }
 }
 
-
+/*
+ * Transition of TAP state from parameter "start"
+ * to "end"
+ */
 void tapTravelFromTo(TapState start, TapState end){
-    TapState currentState = start;
     int tmsRequired;
-    int i = 0;
 
-      while(currentState != end){
-          tmsRequired = getTmsRequired(currentState, end);
-          setTms(tmsRequired);
-          tckCycle();
-          tms |= tmsRequired << (Count*1);
-          tdi |= 0 << (Count*1);
-          tdo |= 0 << (Count*1);
-          Count++;
-          currentState = stateTable[currentState][end].nextState;
-          i++;
+      while(currentTapState != end){
+          tmsRequired = getTmsRequired(currentTapState, end);
+          jtagClkIoTms(0, tmsRequired);
+          currentTapState = updateTapState(currentTapState, tmsRequired);
           }
 }
-
-
 
 void jtagWriteTms(uint64_t data, int length){
   int dataMask = 1;
@@ -296,8 +366,7 @@ void jtagWriteTms(uint64_t data, int length){
 
   while(length > 0){
     oneBitData = dataMask & data;
-    setTms(oneBitData);
-    tckCycle();
+    jtagClkIoTms(0, oneBitData);
     length--;
     data = data >> 1;
   }
@@ -310,23 +379,10 @@ void switchSwdToJtagMode(){
 	resetTapState();
 }
 
-
-int jtagWriteAndReadBit(int data){
-	int tdo;
-	setTdi(data);
-	jtagDelay(100);
-	setClock(1);		// Insert the input first
-	jtagDelay(500);
-	setClock(0);
-	//jtagDelay(500);
-	tdo = HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
-	return tdo;//
-}
-
 uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	int dataMask = 1;
 	int oneBitData = 0;
-	int tdoData = 0;
+	uint64_t tdoData = 0;
 	int i = 0;
 	int n = 0;
 	uint64_t outData = 0;
@@ -334,59 +390,176 @@ uint64_t jtagWriteAndReadBits(uint64_t data, int length){
 	// noted that last bit of data must be set at next tap state
 	for (n = length ; n > 1; n--) {
 	  oneBitData = dataMask & data;
-	  setTms(0);
-	  tdoData = jtagWriteAndReadBit(oneBitData);
-      tdo |= tdoData << (Count*1);
+	  tdoData = jtagClkIoTms(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
 	  outData |= tdoData << (i*1);
-      tms |= 0 << (Count*1);
-      tdi |= oneBitData << (Count*1);
-      Count++;
 	  data = data >> 1;
 	  i++;
 	}
 	oneBitData = dataMask & data;
-	setTms(1);
-	jtagDelay(100);
-	tdoData = jtagWriteAndReadBit(oneBitData);
-	tdo |= tdoData << (Count*1);
+	tdoData = jtagClkIoTms(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
 	outData |= tdoData << (i*1);;
-	tdi |= oneBitData << (Count*1);
-    tms |= 1 << (Count*1);
-    Count++;
 	return outData;
 }
 
-void loadJtagIR(int instructionCode, int length){
-  resetTapState();
-  tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
-  jtagWriteAndReadBits(instructionCode, length);
-  tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
+void loadJtagIR(int instructionCode, int length, TapState start){
+	tapTravelFromTo(start, SHIFT_IR);
+	jtagWriteAndReadBits(instructionCode, length);
+	tapTravelFromTo(EXIT1_IR, RUN_TEST_IDLE);
 }
 
-
 uint64_t jtagWriteAndRead(uint64_t data, int length){
-  uint64_t outData;
+  uint64_t outData = 0;
   tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
   outData = jtagWriteAndReadBits(data, length);
   tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
   return outData;
 }
 
-uint64_t jtagBypass(int data, int length){
-	uint64_t val = 0;
-	loadJtagIR(0b111111111, length);
-	jtagIOInit();
-	val = jtagWriteAndRead(data,length);
+uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLength){
+	uint64_t valRead = 0;
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
+	valRead = jtagWriteAndRead(data,dataLength);
+	return valRead;
+}
+
+void loadBypassRegister(int instruction, int instructionLength, int data, int dataLength){
+	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
+	jtagWriteAndRead(data, dataLength);
+}
+
+uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, int dataLength){
+	uint64_t valRead = 0;
+	loadJtagIR(instructionCode, instructionLength, RUN_TEST_IDLE);
+	valRead = jtagWriteAndRead(data, dataLength);
+	return valRead;
+}
+
+uint64_t jtagReadIDCodeResetTAP(int data, int dataLength){
+	uint64_t valRead = 0;
+	resetTapState();
+	tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_DR);
+	valRead = jtagWriteAndReadBits(data, dataLength);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+	return valRead;
+}
+
+// reset the array to 0
+void bSCInIt(volatile BSCell *bSC){
+	  int i = 0;
+
+	  while(i < BOUNDARY_SCAN_CELL_DIV_8){
+		  bSC->bSCellPreloadData[i] = 0x00000000;
+		  bSC->bSCellSampleData[i] = 0x00000000;
+		  i++;
+	  }
+}
+
+// Read and Write the Boundary Scan Cell at the same time
+void jtagWriteAndReadBSCells(volatile BSCell *bSC, int length){
+	int dataMask = 1;
+	int oneBitData = 0;
+	volatile uint64_t tdoData = 0;
+	uint64_t i = 0;
+	int n = 0;
+	int count = 0;
+
+	// get rid of bypass bit for CORTEX M3 TAP
+	tdoData = jtagClkIoTms(oneBitData, 0);
+	// noted that last bit of data must be set at next tap state
+	for (n = length ; n > 1; n--) {
+	  oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
+	  tdoData = jtagClkIoTms(oneBitData, 0);
+	  currentTapState = updateTapState(currentTapState, 0);
+	  // DIV by 8 to get the index for uint8_t array
+	  (bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);;
+	  (bSC->bSCellPreloadData[count/8]) = bSC->bSCellPreloadData[count/8] >> 1;
+	  i++;
+		if(i%8 == 0)
+			i = 0;
+	  count++;
+	}
+	oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
+	tdoData = jtagClkIoTms(oneBitData, 1);
+	currentTapState = updateTapState(currentTapState, 1);
+	(bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);
+}
+
+
+int jtagReadBSRegInput(volatile BSCell *bSC, BSReg bSReg){
+	int bSRegInput = 0;
+	int mask = 1;
+
+	int arrayIndex = (bSReg.inputCellNum)/ 8;
+	bSRegInput = (bSC->bSCellSampleData[arrayIndex]) >> (bSReg.inputCellNum %8);
+	bSRegInput &= mask;
+	return bSRegInput;
+}
+
+int jtagReadBSCPin(volatile BSCell *bSC, int pin, BSCDataType bSCDataType){
+	int bSRegInput = 0;
+	int mask = 1;
+
+	int arrayIndex = pin/ 8;
+	if(bSCDataType == SAMPLE_DATA)
+		bSRegInput = ((bSC->bSCellSampleData[arrayIndex])) >> (pin%8);
+	else if(bSCDataType == PRELOAD_DATA)
+		bSRegInput = ((bSC->bSCellPreloadData[arrayIndex])) >> (pin%8);
+
+	bSRegInput &= mask;
+	return bSRegInput;
+}
+
+void sampleBSC(volatile BSCell *bSC){
+	tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+}
+
+int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
+	int val = 0;
+
+	loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	sampleBSC(bSC);
+	val = jtagReadBSRegInput(bSC, bSReg);
 	return val;
-}
-
-void loadBypassRegister(int bypassData, int length){
-	loadJtagIR(0b111111111, length);
-	jtagIOInit();
-	jtagWriteAndRead(bypassData, length);
 
 }
 
+void bSCPinConfigure(volatile BSCell *bSC, BSReg bSReg, BSCPinMode pinMode){
+	int arrayIndex = (bSReg.controlCellNum)/ 8;
+	bSC->bSCellPreloadData[arrayIndex]  =  bSC->bSCellPreloadData[arrayIndex] | (pinMode << (bSReg.controlCellNum % 8));
+}
+
+void writePreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
+	int arrayIndex = (bSReg.outputCellNum)/ 8;
+	bSC->bSCellPreloadData[arrayIndex]  =  bSC->bSCellPreloadData[arrayIndex] | (data << (bSReg.outputCellNum % 8));
+}
+
+
+
+void bSCPreloadData(volatile BSCell *bSC, BSReg bSReg, int data){
+	  writePreloadData(bSC, bSReg, data);
+	  if(currentIR != EXTEST){
+	  loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+	  }
+	  tapTravelFromTo(RUN_TEST_IDLE, SHIFT_DR);
+	  jtagWriteAndReadBSCells(bSC, CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH);
+	  tapTravelFromTo(EXIT1_DR, RUN_TEST_IDLE);
+}
+
+void bSCExtestGpioPin(volatile BSCell *bSC, BSReg bSReg, int data){
+	  bSCPreloadData(bSC, bSReg, data);
+	  if(currentIR != EXTEST){
+		  loadJtagIR(EXTEST_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
+		  jtagSetIr(EXTEST);
+	  }
+}
+
+void jtagSetIr(JTAGInstruction instruction){
+	currentIR = instruction;
+}
 
 /* USER CODE END 0 */
 
@@ -399,7 +572,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0;
-	int i = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -420,103 +593,111 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  /*switchSwdToJtagMode();
-  jtagIOInit();
-  loadBypassRegister(0b00, 2);
-  jtagIOInit();
-  val = jtagBypass(0b1110001, 9);
-*/
+  switchSwdToJtagMode();
+  jtagIoInit();
+
+  /*	Bypass Instruction
+  	   * 	Instruction op-code : 9 bit of 1
+  	   * 	1. Load the DR of Boundary Scan(BS) and Cortex TAP
+  	   * 	   with 1.
+  	   * 	2. Send data of 0b1110001 to shift out.
+  	   * 	3. Expected data is
+  	   *
+  	   * 							BS TAP  Cortex TAP
+  	   * 	TDI : 	0b1110001		0b		0b
+  	   * 			--------------> ------> ----> 	TDO
+  	   * 	Expect result from TDO is 0b111000100	(LSB first)
+  	   * */
+  	  val = jtagBypass(BYPASS_BOTH_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0b1110001, 10);
+  	  val = 0;
+
+  	  /*	IDCODE Instruction
+  	   * 	Instruction op-code : 0b000011110
+  	   *	1. Load the IR of Boundary Scan(BS) with 0b00001
+  	   *	   and Cortex TAP with 0b1110
+  	   *    2. Shift out the IDCODE from both TAP's DR.
+  	   *    3. Expected result is
+  	   *        			BS TAP		Cortex TAP
+  	   *	TDI : 		0x16410041		0x3ba00477(LSB)
+  	   *
+  	   *	Expect result from TDO is 0x164100413ba00477
+  	   * */
+  	  val = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
+  	  val = 0;
+
+  	  /*	Get IDCODE after reset TAP state to TEST_LOGIC_RESET
+  	   * 	Expect result from TDO is 0x164100413ba00477
+  	   * */
+  	  val = jtagReadIDCodeResetTAP(DUMMY_DATA, 64);
+  	  val = 0;
+
+  	  /*	Get IDCODE for BS TAP and bypass Cortex TAP
+  	   *	retval need to shift right by 1 bit bcoz of
+  	   *	bypass bit for Cortex TAP
+  	   *
+  	   *	Expect result from TDO is 0xXXXXXXXX16410041
+  	   * */
+  	  val = jtagReadIdCode(READ_BSC_IDCODE_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
+  	  val = val>>1;
+  	  val = 0;
+
+  	  /*	Bypass BS TAP and get IDCODE for Cortex TAP
+  	   *
+  	   * 	Expect result from TDO is 0xXXXXXXXX3ba00477
+  	   * */
+  	  val = jtagReadIdCode(BYPASS_BSC_TAP_READ_M3_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, 0xffffffffffffffff, 64);
+  	  val = 0;
+
+  	  /*	SAMPLE Instruction
+  	   * 	Sample the Gpio pin while the MCU is running in normal operation
+  	   *
+  	   * 	Example
+  	   * 	When pin pa12 is connected to GND the expected val is 0,
+  	   * 	if pin pa12 is connected to 3.3V the expected val is 1
+  	   * */
+  	  bSCInIt(&bsc1);
+  	  bSCPinConfigure(&bsc1, pa12, INPUT_PIN);
+  	  val = bSCSampleGpioPin(&bsc1, pa12);
+  	  /*	PRELOAD Instruction
+  	   * 	Loaded the test pattern that will use for EXTEST later
+  	   *
+  	   * 	Example
+  	   *	Load '1' at the output cell of pb9 (tri-stated).
+  	   *	When loading EXTEST instruction, pb9 will output HIGH '1'
+  	   *
+  	   * */
+  	  writePreloadData(&bsc1, pa12, 1);
+  	  val = jtagReadBSCPin(&bsc1, pa12.outputCellNum, PRELOAD_DATA);
+
+  	  /*	EXTEST Instruction
+  	   * 	Apply the test pattern preloaded from PRELOAD Instruction
+  	   * 	to the circuit
+  	   *
+  	   * 	NOTICE : Make sure the currentIR is not EXTEST for first time
+  	   * 			 then update the currentIR to EXTEST
+  	   * */
+  	 bSCPinConfigure(&bsc1, pa9, OUTPUT_PIN);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 1);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
+  	 bSCExtestGpioPin(&bsc1, pa9, 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  /*	Bypass Instruction
-	   * 	Instruction op-code : 9 bit of 1
-	   * 	1. Load the DR of Boundary Scan(BS) and Cortex TAP
-	   * 	   with 1.
-	   * 	2. Send data of 0b1110001 to shift out.
-	   * 	3. Expected data is
-	   *
-	   * 							BS TAP  Cortex TAP
-	   * 	TDI : 	0b1110001		0b1		0b1
-	   * 			--------------> ------> ----> 	TDO
-	   * 	Expect result from TDO is 0b111000111	(LSB first)
-	   */
 
 
-	  val = 0;
-
-	  setClock(1);
-	  val = HAL_GPIO_ReadPin(TMS_GPIO_Port, TMS_Pin);
-	  jtagDelay(500);
-
-	  setClock(0);
-	  jtagDelay(500);
-
-	  val = 1;
-	  setClock(1);
-	  val = HAL_GPIO_ReadPin(TMS_GPIO_Port, TMS_Pin);
-	  jtagDelay(500);
-	  setClock(0);
-	  jtagDelay(500);
-
-/*
-	  val = 0;
-	  setClock(1);
-	  jtagDelay(500);
-	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
-	  setClock(0);
-	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
-	  i++;
-
-	  setClock(1);
-	  jtagDelay(500);
-	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 1);
-	  setClock(0);
-	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
-	  i++;
-
-	  setClock(1);
-	  jtagDelay(500);
-	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
-	  setClock(0);
-	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
-	  i++;
-
-	  setClock(1);
-	  jtagDelay(500);
-	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 1);
-	  setClock(0);
-	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
-	  i++;
-
-	  setClock(1);
-	  jtagDelay(500);
-	  HAL_GPIO_WritePin(TDO_GPIO_Port, TDO_Pin, 0);
-	  setClock(0);
-	  val |= HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin) << (i*1);
-	  i++;
-*/
-
-
-	  //resetTapState();
-	  //val = jtagWriteAndRead(0x00000000, 64);
-	  //tapTravelFromTo(TEST_LOGIC_RESET, SHIFT_IR);
-	  //jtagWriteAndReadBits(0b10, 2);
-
-	  //110010010
-	  //110010010
-
-
-
-	 //jtagReadBits(0x00000000, 32);
-	//loadJtagDR(0x0ffff0000,33);
-
-	//loadJtagIR(0b111111110,9);
+	 //HAL_UART_Receive(&huart1, val, 10, 1000);
+	  HAL_UART_Transmit(&huart1, (uint8_t *)("Hello World\n"), strlen("Hello World\n"), 100);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -576,6 +757,25 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+/* USART1 init function */
+static void MX_USART1_UART_Init(void)
+{
+
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
 /** Configure pins as 
         * Analog 
         * Input 
@@ -594,7 +794,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, TCK_Pin|TDI_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, TCK_Pin|TMS_Pin|TDI_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : TDO_Pin */
   GPIO_InitStruct.Pin = TDO_Pin;
@@ -602,18 +802,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(TDO_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : TCK_Pin TDI_Pin */
-  GPIO_InitStruct.Pin = TCK_Pin|TDI_Pin;
+  /*Configure GPIO pins : TCK_Pin TMS_Pin TDI_Pin */
+  GPIO_InitStruct.Pin = TCK_Pin|TMS_Pin|TDI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : TMS_Pin */
-  GPIO_InitStruct.Pin = TMS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(TMS_GPIO_Port, &GPIO_InitStruct);
 
 }
 
