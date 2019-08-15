@@ -164,6 +164,7 @@ uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLe
 	uint64_t valRead = 0;
 	loadJtagIR(instruction, instructionLength, RUN_TEST_IDLE);
 	valRead = jtagWriteAndRead(data,dataLength);
+	jtagSetIr(BYPASS);
 	return valRead;
 }
 
@@ -176,6 +177,7 @@ uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, in
 	uint64_t valRead = 0;
 	loadJtagIR(instructionCode, instructionLength, RUN_TEST_IDLE);
 	valRead = jtagWriteAndRead(data, dataLength);
+	jtagSetIr(IDCODE);
 	return valRead;
 }
 

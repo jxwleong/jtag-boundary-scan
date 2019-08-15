@@ -30,7 +30,8 @@ Src/main.o: ../Src/main.c \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/USART.h \
  C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Def.h \
- C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h
+ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h \
+ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/myString.h
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/main.h:
 
@@ -95,3 +96,5 @@ C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/USART.h:
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BSReg_Def.h:
 
 C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/BoundaryScan.h:
+
+C:/student/JLXW/JTAG_BoundaryScan/STM32_JTAG/Inc/myString.h:

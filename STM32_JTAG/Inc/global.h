@@ -30,7 +30,7 @@ typedef enum{
 #define DUMMY_DATA			0x1234abcd
 #define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
 
-#define BUFFER_SIZE			128
+#define BUFFER_SIZE			1024
 #define BSCELL_STR_LENGTH	16
 
 // HAL GPIO MACROs
