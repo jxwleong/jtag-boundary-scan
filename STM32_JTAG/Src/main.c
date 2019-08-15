@@ -41,12 +41,14 @@
 #include "stm32f1xx_hal.h"
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "Tap.h"
 #include "global.h"
 #include "BoundaryScan.h"
 #include "USART.h"
 #include "BSReg_Def.h"
+#include "myString.h"
 
 /* USER CODE END Includes */
 
@@ -60,20 +62,11 @@ UART_HandleTypeDef huart1;
 TapState currentTapState = TEST_LOGIC_RESET;
 JTAGInstruction currentIR = DONT_CARE;
 
+extern BSCell bsc1;
 
 
-uint64_t tms = 0;
-uint64_t tdi = 0;
-uint64_t tdo = 0;
-uint32_t Count = 0;
-
-
-volatile BSCell bsc1;
-char tempBuffer[BUFFER_SIZE] = {0};
 char menuBuffer[BUFFER_SIZE] = {0};
-volatile char commandBuffer[BUFFER_SIZE] = {0};
-
-uint64_t tempVal = 0;
+char commandBuffer[BUFFER_SIZE] = {0};
 
 /* USER CODE END PV */
 
@@ -91,28 +84,6 @@ static void MX_USART1_UART_Init(void);
 
 
 
-void commandLineOperation(volatile char *commandStr){
-	int i = 0;
-	if(!(strcasecmp(commandStr, "jtag idcode"))){
-		tempVal = jtagReadIdCode(READ_BOTH_IDCODE, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, DUMMY_DATA, 64);
-		uint32_t bSCID = 0, cortexM3ID = 0;
-		cortexM3ID = tempVal & 0xffffffff;
-		bSCID = tempVal>>32;
-		sprintf(tempBuffer, "Cortex M3 ID Code : 0x%X \nBoundary Scan Cell ID Code : 0x%X \n\n", cortexM3ID, bSCID);
-	}
-
-	else if(strstr(commandStr, "jtag sample") != '\0'){
-		bypassCharactersInStr(&commandStr, 11);
-		BSReg BSReg = getBSRegFromStr(commandStr);
-		bSCInIt(&bsc1);
-		bSCPinConfigure(&bsc1, BSReg, INPUT_PIN);
-		sprintf(tempBuffer, "Current value for pin %s is %i\n\n", BSReg.pinName, bSCSampleGpioPin(&bsc1, BSReg));
-	}
-	//else if(!(strcasecmp(commandStr, "jtag idcode")))
-	uartTransmitBuffer(uart1, tempBuffer);
-
-}
-
 
 
 
@@ -127,6 +98,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	volatile uint64_t val = 0, i = 0;
+	sprintf( menuBuffer, "\t\tWelcome to JTAG Interface for STM32F103C8T6, \
+			\n \t\t\t type 'help' for enquiry \n\n");
+
 
   /* USER CODE END 1 */
 
@@ -245,6 +219,7 @@ int main(void)
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 uartTransmitBuffer(uart1, menuBuffer);
 
+	 bSCInIt(&bsc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

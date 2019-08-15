@@ -92,6 +92,7 @@ int bSCSampleGpioPin(volatile BSCell *bSC, BSReg bSReg){
 
 	loadJtagIR(SAMPLE_PRELOAD_BSC_TAP_BYPASS_M3_TAP, CORTEX_M3_JTAG_INSTRUCTION_LENGTH, RUN_TEST_IDLE);
 	sampleBSC(bSC);
+	jtagSetIr(SAMPLE_PRELOAD);
 	val = jtagReadBSRegInput(bSC, bSReg);
 	return val;
 
@@ -127,15 +128,15 @@ void bSCExtestGpioPin(volatile BSCell *bSC, BSReg bSReg, int data){
 	  }
 }
 
-BSReg getBSRegFromStr(char *str){
+BSReg getBSRegFromStr(char **str){
     char BSRegInStr[BSCELL_STR_LENGTH] = {0};
     int i = 0;
     // skip the blank spaces in string
-    skipWhiteSpaces(&str);
+    skipWhiteSpaces(&(*str));
 
-    while(*str != ' ' && *str != '\0'){
-        BSRegInStr[i] = *str;
-        str++;
+    while(**str != ' ' && **str != '\0'){
+        BSRegInStr[i] = **str;
+        ++*str;
         i++;
     }
 

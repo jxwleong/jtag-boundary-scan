@@ -45,6 +45,6 @@ void writePreloadData(volatile BSCell *bSC, BSReg bSReg, int data);
 void bSCPreloadData(volatile BSCell *bSC, BSReg bSReg, int data);
 void bSCExtestGpioPin(volatile BSCell *bSC, BSReg bSReg, int data);
 
-BSReg getBSRegFromStr(char *str);
+BSReg getBSRegFromStr(char **str);
 
 #endif // _BOUNDARYSCAN_H
