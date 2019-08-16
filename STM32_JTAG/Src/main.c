@@ -220,6 +220,8 @@ int main(void)
   	 bSCExtestGpioPin(&bsc1, pa9, 0);
   	 uartTransmitBuffer(uart1, menuBuffer);
 
+  	 char *str = "pa9";
+  	 volatile int k = isBSRegValid(str);
 	 bSCInIt(&bsc1);
   /* USER CODE END 2 */
 

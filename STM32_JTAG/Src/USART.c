@@ -73,6 +73,9 @@ void commandLineOperation(char *commandStr){
 
 	else if(strstr(commandStr, "jtag sample") != '\0'){
 		bypassCharactersInStr(&commandStr, 11);	// move the pointer after 'jtag sample'
+		if(!(isBSRegValid(commandStr)))		// If the BS pin is invalid then print error message
+			goto transmitBuffer;
+
 		BSReg BSReg = getBSRegFromStr(&commandStr);
 	  	bSCInIt(&bsc1);
 		bSCPinConfigure(&bsc1, BSReg, INPUT_PIN);
@@ -124,7 +127,7 @@ void commandLineOperation(char *commandStr){
 		sprintf(tempBuffer, "\nUnknown command received. Please type 'help' for assitance. \
 				\n\n");
 	}
-
+transmitBuffer:
 	uartTransmitBuffer(uart1, tempBuffer);
 	// clear the buffer so that same instruction will not run
 	// when user press 'ENTER'

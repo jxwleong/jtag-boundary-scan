@@ -5,13 +5,14 @@
  *      Author: user
  */
 
-
-#include "BSReg_Table.h"
+#include<stdio.h>
 #include <string.h>
+#include "BSReg_Table.h"
+#include "global.h"
 
 #define NO_OF_BOUNDARY_SCAN_REG 	64
 
-
+extern char tempBuffer[BUFFER_SIZE];
 
 BSReg	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 		// GPIO_A
@@ -59,9 +60,22 @@ BSReg	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 };
 
 BSReg getBSRegFromTable(char *str){
+	skipWhiteSpaces(&str);
 	for(int i = 0; i<NO_OF_BOUNDARY_SCAN_REG;i++){
 		if(!(strcasecmp(bSRegTable[i].pinName, str))){
 			return (bSRegTable[i]);
 		}
 	}
+}
+
+int isBSRegValid(char *str){
+	skipWhiteSpaces(&str);
+	for(int i = 0; i<NO_OF_BOUNDARY_SCAN_REG;i++){
+		if(!(strcasecmp(bSRegTable[i].pinName, str))){
+			return 1;
+		}
+	}
+	sprintf(tempBuffer, "Invalid Boundary Scan Register(pin) '%s' received\n", str);
+	return 0;
+
 }
