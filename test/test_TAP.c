@@ -1,9 +1,9 @@
 #include <unity.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include "cmock.h"  // include this header will cause multiple definition of stateMachineLookUpTable
+#include "cmock.h"
+#include "mock_jtagLowLevel.h"
 #include "TAP.h"
-#include "mock_TAP_Mock.h"
 #include "TAP_LookUpTable.h"
 #include "UnityErrorHandler.h"
 #include "CExceptionConfig.h"
@@ -11,6 +11,7 @@
 #include "Exception.h"
 #include "error.h"
 #include "global.h"
+
 
 JtagState jtagState = {TEST_LOGIC_RESET, 0, 0};
 

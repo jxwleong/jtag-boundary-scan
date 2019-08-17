@@ -38,6 +38,7 @@ struct JtagState{
   JtagOperation operation;
 };
 
+
 typedef struct TapSequence TapSequence;
 struct TapSequence{
   TapState state;
@@ -46,6 +47,8 @@ struct TapSequence{
   int bits;
 };
 
+
+
 typedef struct TapTestTable TapTestTable;
 struct TapTestTable{
   TapState currentState;
@@ -53,9 +56,21 @@ struct TapTestTable{
   TapState nextState_tms1;
 };
 
-void tapTestLogicReset();
+
+
 char *getTapStateName(TapState tapState);
-void tapWriteBits(uint64_t data, int length);
-uint64_t tapReadBits(int length);
+void jtagIoInit();
+int jtagClkIoTms(int data, int tms);
+void resetTapState();
+void tapTravelFromTo(TapState start, TapState end);
+void jtagWriteTms(uint64_t data, int length);
+void switchSwdToJtagMode();
+uint64_t jtagWriteAndReadBits(uint64_t data, int length);
+void loadJtagIR(int instructionCode, int length, TapState start);
+uint64_t jtagWriteAndRead(uint64_t data, int length);
+uint64_t jtagBypass(int instruction, int instructionLength, int data, int dataLength);
+void loadBypassRegister(int instruction, int instructionLength, int data, int dataLength);
+uint64_t jtagReadIdCode(int instructionCode, int instructionLength, int data, int dataLength);
+uint64_t jtagReadIDCodeResetTAP(int data, int dataLength);
 
 #endif // _TAP_FUNC_H

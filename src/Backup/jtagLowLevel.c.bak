@@ -1,0 +1,34 @@
+/*
+ * jtagLowLevel.c
+ *
+ *  Created on: Aug 17, 2019
+ *      Author: User
+ */
+
+#include "jtagLowLevel.h"
+
+/*
+ * Initialize all JTAG's input pin to zero
+ */
+void jtagIoInit(){
+	setClock(0);
+	setTms(0);
+	writeTdi(0);
+}
+
+/*
+ * Handle the TCK, TMS, TDI(data), and
+ * return value read at same CLK cycle.
+ */
+int jtagClkIoTms(int data, int tms){
+	int val = 0;
+
+	setClock(0);
+	setTms(tms);
+	writeTdi(data);
+	jtagDelay(500);
+	setClock(1);
+	val = readTdo();
+	jtagDelay(500);
+	return val;
+}

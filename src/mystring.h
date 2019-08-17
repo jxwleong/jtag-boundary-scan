@@ -1,6 +1,12 @@
+/*
+ * myString.h
+ *
+ *  Created on: Aug 14, 2019
+ *      Author: user
+ */
+
 #ifndef MYSTRING_H_
 #define MYSTRING_H_
-
 
 typedef enum{
   DECIMAL = 10,

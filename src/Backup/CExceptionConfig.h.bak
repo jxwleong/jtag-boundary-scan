@@ -1,7 +1,7 @@
 #ifndef _CEXCEPTIONCONFIG_H
 #define _CEXCEPTIONCONFIG_H
 
-#include <Exception.h>
+//#include <Exception.h>
 
 // User defined CException configuration
 #define CEXCEPTION_T          Exception *

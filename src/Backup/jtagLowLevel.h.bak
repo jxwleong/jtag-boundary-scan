@@ -1,0 +1,24 @@
+/*
+ * jtagLowLevel.h
+ *
+ *  Created on: Aug 17, 2019
+ *      Author: User
+ */
+
+#ifndef JTAGLOWLEVEL_H_
+#define JTAGLOWLEVEL_H_
+
+#include "main.h"
+#include "stm32f1xx_hal.h"
+
+
+// HAL GPIO MACROs
+#define setClock(clk)	HAL_GPIO_WritePin(TCK_GPIO_Port, TCK_Pin, clk);
+#define setTms(tms)		HAL_GPIO_WritePin(TMS_GPIO_Port, TMS_Pin, tms);
+#define writeTdi(tdi)	HAL_GPIO_WritePin(TDI_GPIO_Port, TDI_Pin, tdi);
+#define readTdo()		HAL_GPIO_ReadPin(TDO_GPIO_Port, TDO_Pin);
+
+void jtagIoInit();
+int jtagClkIoTms(int data, int tms);
+
+#endif /* JTAGLOWLEVEL_H_ */

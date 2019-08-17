@@ -2,7 +2,9 @@
 #include <inttypes.h>
 #include "TAP_LookUpTable.h"
 #include "TAP.h"
+#include "TAP_Mock.h"
 #include "global.h"
+#include "stm32f1xx_hal.h"
 #include "TAP_StateTable.h"
 #include "jtagLowLevel.h"
 
