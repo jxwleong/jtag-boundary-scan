@@ -36,15 +36,19 @@ NumberTypeBase getNumberTypeInStr(char **str){
 if(**str == 'B' || **str == 'b'){
     ++*str; // remove the character 'b'
     return BINARY;
-}
+  }
 else if(**str == 'x' || **str == 'X'){
     ++*str; // remove the character 'b'
     return HEXADECIMAL;
-}
-else{
+  }
+else if(isdigit(**str)){
     --*str; // move the pointer to start
     return DECIMAL;
-}
+  }
+else{
+  printf("Invalid number is received");
+  return INVALID;
+  }
 }
 
 char *decimalToBinaryInStr(int data, int length){
