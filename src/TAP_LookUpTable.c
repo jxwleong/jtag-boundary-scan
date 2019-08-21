@@ -172,7 +172,7 @@ void jtagGoTo(JtagState start, TapState end){
 
       while(currentState != end){
           tmsRequired = getTmsRequired(currentState, end);
-          tapStep(tmsRequired, 0);// int tapStep(tms, tdi)
+          jtagClkIoTms(tmsRequired, 0);// int jtagClkIoTms(tms, tdi)
           jtagState.state = getTapState(currentState, tmsRequired);
           currentState = stateMachineLookUpTable[currentState][end].nextState;
           i++;
