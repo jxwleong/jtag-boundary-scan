@@ -5,7 +5,8 @@ IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.
 ## What is JTAG?
 JTAG is an industrial standard for testing and verifying PCB designs after fabricate. Besides that, JTAG is often used as an debugger
 for hardware such as microcontroller like STM32F103C8T6.
-![JTAG Register](https://www.xjtag.com/wp-content/uploads/jtag-registers.jpg)  
+
+![JTAG Register](https://trello-attachments.s3.amazonaws.com/5d00bb8cf5abae679851c1e1/663x747/aaf8d3e3d635433cda69bcc63c7b9f44/Instruction-decoder.png)  
 
 <div align="center">
   Figure 1. JTAG Register from [2.]  
@@ -30,7 +31,8 @@ will be `SHIFT_DR` which will shift data from `TDI` to `TDO` through `Boundary S
 
 ## JTAG Instructions  
 ### 1.BYPASS  
-By IEEE standard, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). 
+By IEEE standard, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). By referring to
+Figure 1., when BYPASS instruction is loaded, `Data In (TDI)` andn ``
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
