@@ -33,13 +33,18 @@ will be `SHIFT_DR` which will shift data from `TDI` to `TDO`.
 ### 1.BYPASS  
 By IEEE standard, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction
 is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
-By referring to Figure 1. , when BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how
+By referring to Figure 1. , after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how
 many bypass device(s).
 
 ### 2. IDCODE
+JTAG IDCODE is a 32-bit device specific part number. Athouhg it's not a compulsory instruction specified by IEEE, but most JTAG device
+have this instruction. Most of the time, the IDCODE of JTAG device is used to get Boundary Scan Information from BSDL files.
+By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` are connected with `Device ID Reg`. If there's only
+one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
+than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
-[2.] [JTAG Instructions video](https://www.youtube.com/watch?v=XEN01h9qkC4)
+[2.] [JTAG Instructions video](https://www.youtube.com/watch?v=XEN01h9qkC4)  
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
-[4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)
+[4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)  
