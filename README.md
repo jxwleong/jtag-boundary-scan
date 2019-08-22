@@ -40,6 +40,6 @@ many bypass device(s).
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
-[2.] JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)
+[2.] [JTAG Instructions video](https://www.youtube.com/watch?v=XEN01h9qkC4)
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
 [4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)
