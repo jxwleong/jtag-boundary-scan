@@ -48,8 +48,15 @@ Besides, there's another way to get IDCODE of JTAG device that is reset the TAP 
 </div>  
 
 ### 3. SAMPLE/PRELOAD
-This instructions is required by IEEE Standard 1149.1.   
-  
+This instruction is required by IEEE Standard 1149.1. This instruction connect `TDI` and `TDO` through the `Boundary scan register`.  
+This instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
+
+![Boundary Scan Register](https://i.ibb.co/hyPtbg6/Boundary-Scan-Register.png)  
+![](https://i.ibb.co/64xYs5c/Boundary-Scan-Register-Sample.png)
+<div align="center">
+  Figure 4. Boundary Scan Register from [6.] pg9 
+</div>  
+
 ***SAMPLE*** 
 
 ## References
@@ -58,3 +65,5 @@ This instructions is required by IEEE Standard 1149.1.
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
 [4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)  
 [5.] [DSP56300 JTAG Examples](https://www.nxp.com/docs/en/application-note/AN2074.pdf)  
+[6.] [AN 39: IEEE 1149.1 (JTAG) Boundary-Scan Testing in Altera Devices
+](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/an/an039.pdf)  
