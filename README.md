@@ -1,12 +1,17 @@
 ## Summary
 1.  [What is this repo about?](#repoIntro)
-
-
+2.  [What is JTAG?](#jtagIntro)
+3.  [JTAG Instuctions](#jtagInstruc)
+  1. [BYPASS](#bypass)
+  2. [IDCODE](#idcode)
+  3. [SAMPLE/PRELOAD](#samPre)
+  4. [EXTEST](#extest)
+  
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
 IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.
 
-## What is JTAG?
+## <a name="jtagIntro"></a> What is JTAG?
 JTAG is an industrial standard for testing and verifying PCB designs after fabricate. Besides that, JTAG is often used as an debugger
 for hardware such as microcontroller like STM32F103C8T6.
 
@@ -34,12 +39,12 @@ device can transition to another state to do different operations. For exaple, i
 `External Connections` into `Boundary Scan Register` then a pulse of high `TMS` and `TCK` was send to JTAG device. After that, current state 
 will be `SHIFT_DR` which will shift data from `TDI` to `TDO`.
 
-## JTAG Instructions  
-### 1.BYPASS  
+## <a name="jtagInstruc"></a>  JTAG Instructions  
+### <a name="bypass"></a> 1.BYPASS  
 By IEEE Standard 1149.1, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
 By referring to Figure 1. , after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how many bypass device(s). `bypass bits = n * 1`.
 
-### 2. IDCODE
+### <a name="idcode"></a> 2. IDCODE
 JTAG IDCODE is a 32-bit device specific part number. Athouhg it's not a compulsory instruction specified by IEEE, but most JTAG device
 have this instruction. Most of the time, the IDCODE of JTAG device is used to get Boundary Scan Information from BSDL files.
 By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` are connected with `Device ID Reg`. If there's only
@@ -54,7 +59,7 @@ the Tap state machine, the IDCODE instruction will be loaded automatically into 
   Figure 3. Read IDCODE after reset TAP State Machine from [5.] pg5 
 </div>  
 
-### 3. SAMPLE/PRELOAD
+### <a name="samPre"></a> 3. SAMPLE/PRELOAD
 This instruction is required by IEEE Standard 1149.1. This instruction connect `TDI` and `TDO` through the `Boundary scan register`.  
 Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
@@ -69,7 +74,7 @@ After capturing the data(SAMPLE), then proceed to `SHIFT_DR`. At this state, the
 pin can be shifted in from `TDI`. After shifting the correct test pattern, then go to `UPDATE_DR` state to update the data to 
 `Update Registers`. The preloaded data is now ready for `EXTEST` instruction.
 
-### 4. EXTEST  
+### <a name="extest"></a> 4. EXTEST  
 This instruction is also a compulsory instruction by IEEE Standard 1149.1. This instruction is often used to test the external
 circuitry of the device. For example,
 ![alt text](https://i.ibb.co/hKqxy4k/Capture.png "Connection between chips")
@@ -78,7 +83,7 @@ circuitry of the device. For example,
 </div>    
 
 Based the circuitry on Figure 4. , EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips. To test the
-Stuck-at fault defect at chip #1, a test pattern of `0bxxxx 1xxx` can be preloaded on chip #1 by using `SAMPLE/PRELOAD` instruction. Then, `EXTEST` instruction can be loaded in chip #1. For chip #2, sample the I/O pins by using `SAMPLE/ PRELOAD` instruction. If the
+Stuck-at fault defect at chip #1, a test pattern of `0bxxxx 1xxx` can be preloaded on chip #1 by using `SAMPLE/PRELOAD` instruction. Then, `EXTEST` instruction can be loaded in chip #1. For chip #2, sample the I/O pins by using `SAMPLE/PRELOAD` instruction. If the
 results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.  
   
 
