@@ -70,7 +70,9 @@ circuitry of the device. For example,
 <div align="center">
   Figure 4. Example of EXTEST from [2.]
 </div>  
-Based the circuitry on Figure 4. , EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips.  
+Based the circuitry on Figure 4. , EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips. To test the
+Stuck-at fault defect at chip #1, a test pattern of `0bxxxx 1xxx` can be preloaded on chip #1 by using `SAMPLE/PRELOAD` instruction. Then, `EXTEST` instruction can be loaded in chip #1. For chip #2, sample the I/O pins by using `SAMPLE/ PRELOAD` instruction. If the
+results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.
 
 ![Boundary Scan Register Extest](https://i.ibb.co/XLz80cc/ezgif-com-gif-maker-2.gif)  
 <div align="center">
