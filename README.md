@@ -84,6 +84,9 @@ results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.
 </div>  
 
 Before using `EXTEST` instruction, the test pattern must be preloaded with `SAMPLE/PRELOAD` instruction. After loading `EXTEST` instruction, go to `CAPTURE_DR` state. In this state, the preloaded data at `Update Registers` will drive `INJ`, `PIN_OE`and `PIN_OUT`.
+The next test pattern can be shift in by apply `TMS` of 1 and a pulse of `TCK` to go to `SHIFT_DR`. After applying the test pattern, go
+to `UPDATE_DR` state to update the `Update Registers` with latest test pattern. Repeat the process by going to `CAPTURE_DR` state if
+further `EXTEST` is desired.
 
  by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
 the TAP state machine enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
