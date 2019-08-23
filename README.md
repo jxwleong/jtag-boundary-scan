@@ -99,6 +99,8 @@ When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` cl
 <div align="center">
   Figure 5. Documentation from [6.] pg25  
 </div>  
+  
+  
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
