@@ -42,7 +42,7 @@ By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` 
 one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
 than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
-Besides, there's another way to get IDCODE of JTAG device that is reset the TAP state machine to TEST_LOGIC_RESET state. By resetting
+Besides, there's another way to get IDCODE of JTAG device that is reset the TAP controller to TEST_LOGIC_RESET state. By resetting
 the Tap state machine, the IDCODE instruction will be loaded automatically into `Instruction Register`.
 
 ![read IDCODE after reset](https://i.ibb.co/FVH7ggz/reset-Read-IDCOde.png)  
@@ -93,9 +93,9 @@ further `EXTEST` is desired.
 <div align="center">
   Figure 5. Example of JTAG waveform from [6.] pg25  
 </div>  
-
+Based on the documentation on [5.] pg10, when the TAP controller
  by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
-the TAP state machine enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
+the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
 at the second `TCK` clock cycle, `TDI` and `TDO` is shifted.
 
 ## References
