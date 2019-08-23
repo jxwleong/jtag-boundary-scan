@@ -88,6 +88,8 @@ The next test pattern can be shift in by apply `TMS` of 1 and a pulse of `TCK` t
 to `UPDATE_DR` state to update the `Update Registers` with latest test pattern. Repeat the process by going to `CAPTURE_DR` state if
 further `EXTEST` is desired.  
 
+**Note, me and my [supervisor](https://github.com/chaosAD) noticed that when `EXTEST` instruction is loaded first time, it works fine. But when trying to reload the EXTEST instruction again. The MCU seems to regain control of the pin and cause unexpected behaviour. To solve this, if the EXTEST instruction is already loaded and directly shift the data from TDI and TDO. In short, if multiple EXTEST is needed, make sure don't reload the instruction register.**
+
 ## JTAG I/O signals
 ![Example of JTAG waveform](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d01a23eae083935945dcb4a/af60b1f0e726cff13dfc213a915b40b6/jtagWave.png)
 <div align="center">
@@ -97,10 +99,11 @@ further `EXTEST` is desired.
 When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By refering from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
 ![Last shift on next TAP state](https://i.ibb.co/pd5mFcy/jtag-io-signals.png)
 <div align="center">
-  Figure 5. Documentation from [6.] pg25  
+  Figure 6. Documentation from [6.] pg25  
 </div>  
   
-  
+Based on Figure6. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.
+
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
