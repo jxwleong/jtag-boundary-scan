@@ -31,10 +31,8 @@ will be `SHIFT_DR` which will shift data from `TDI` to `TDO`.
 
 ## JTAG Instructions  
 ### 1.BYPASS  
-By IEEE standard, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction
-is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
-By referring to Figure 1. , after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how
-many bypass device(s).
+By IEEE Standard 1149.1, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
+By referring to Figure 1. , after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how many bypass device(s). `bypass bits = n * 1`.
 
 ### 2. IDCODE
 JTAG IDCODE is a 32-bit device specific part number. Athouhg it's not a compulsory instruction specified by IEEE, but most JTAG device
@@ -43,8 +41,20 @@ By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` 
 one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
 than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
+Besides, there's another way to get IDCODE of JTAG device that is reset the TAP State Machine to TEST_LOGIC_RESET state.
+![read IDCODE after reset](https://i.ibb.co/FVH7ggz/reset-Read-IDCOde.png)  
+<div align="center">
+  Figure 3. Read IDCODE after reset TAP State Machine from [5.] pg5 
+</div>  
+
+### 3. SAMPLE/PRELOAD
+This instructions is required by IEEE Standard 1149.1.   
+  
+***SAMPLE*** 
+
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [JTAG Instructions video](https://www.youtube.com/watch?v=XEN01h9qkC4)  
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
 [4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)  
+[5.] [DSP56300 JTAG Examples](https://www.nxp.com/docs/en/application-note/AN2074.pdf)  
