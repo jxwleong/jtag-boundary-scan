@@ -94,8 +94,11 @@ further `EXTEST` is desired.
   Figure 5. Example of JTAG waveform from [6.] pg25  
 </div>  
 
-When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By refering from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read. 
-
+When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By refering from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
+![Last shift on next TAP state](https://i.ibb.co/pd5mFcy/jtag-io-signals.png)
+<div align="center">
+  Figure 5. Documentation from [6.] pg25  
+</div>  
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
