@@ -52,7 +52,7 @@ Besides, there's another way to get IDCODE of JTAG device that is reset the TAP 
 This instruction is required by IEEE Standard 1149.1. This instruction connect `TDI` and `TDO` through the `Boundary scan register`.  
 This instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
-![Boundary Scan Register](https://i.ibb.co/q1rXpn9/SAMPLE-PRELOAD-BSR.gif)  
+![Boundary Scan Register](https://media.giphy.com/media/eHFBap52TL0Zw3XLVR/giphy.gif)  
 
 <div align="center">
   Gif 1. Boundary Scan Register from [6.] pg9 
@@ -61,6 +61,8 @@ This instruction allows user to take a snapshot of the system I/O pins witout af
 By default(no shifting), the input pin data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `INJ` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
 After capturing the data(SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
 pin can be shifted in from `TDI` so that the preload data can be used for `EXTEST` instruction.
+
+### 4. EXTEST
 
 
  by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
