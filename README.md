@@ -18,7 +18,8 @@ project, only 4 I/O pins were used.
 With so many data lines connected to the device, a controller unit is needed to tell the JTAG device what to do. That control unit is named
 Test Access Port(TAP) controller.
 
-![TAP State Machine](https://www.xjtag.com/wp-content/uploads/tap_state_machine.gif)  
+![
+Machine](https://www.xjtag.com/wp-content/uploads/tap_state_machine.gif)  
 <div align="center">
   Figure 2. JTAG TAP Controller (State Machine) from [3.]  
 </div>  
@@ -41,7 +42,7 @@ By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` 
 one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
 than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
-Besides, there's another way to get IDCODE of JTAG device that is reset the TAP State Machine to TEST_LOGIC_RESET state.
+Besides, there's another way to get IDCODE of JTAG device that is reset the TAP state machine to TEST_LOGIC_RESET state.
 ![read IDCODE after reset](https://i.ibb.co/FVH7ggz/reset-Read-IDCOde.png)  
 <div align="center">
   Figure 3. Read IDCODE after reset TAP State Machine from [5.] pg5 
@@ -58,8 +59,13 @@ This instruction allows user to take a snapshot of the system I/O pins witout af
 </div>  
 
 By default(no shifting), the input pin data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `INJ` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
-After capturing the data(SAMPLE), then proceed to `SHIFT_DR` by applying `TMS` signals of `1` and a clock pulse of `TCK`. 
+After capturing the data(SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
+pin can be shifted in from `TDI` so that the preload data can be used for `EXTEST` instruction.
 
+
+ by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
+the TAP state machine enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
+at the second `TCK` clock cycle, `TDI` and `TDO` is shifted.
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
