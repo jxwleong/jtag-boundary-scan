@@ -57,11 +57,13 @@ This instruction allows user to take a snapshot of the system I/O pins witout af
   Gif 1. Boundary Scan Register from [6.] pg9 
 </div>  
 
-***SAMPLE*** 
+By default(no shifting), the input pin data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `INJ` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
+After capturing the data(SAMPLE), then proceed to `SHIFT_DR` by applying `TMS` signals of `1` and a clock pulse of `TCK`. 
+
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
-[2.] [JTAG Instructions video](https://www.youtube.com/watch?v=XEN01h9qkC4)  
+[2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
 [4.] [Technical Guide to JTAG](https://www.xjtag.com/about-jtag/jtag-a-technical-overview/)  
 [5.] [DSP56300 JTAG Examples](https://www.nxp.com/docs/en/application-note/AN2074.pdf)  
