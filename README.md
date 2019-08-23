@@ -52,7 +52,7 @@ This instruction is required by IEEE Standard 1149.1. This instruction connect `
 This instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
 ![Boundary Scan Register](https://i.ibb.co/hyPtbg6/Boundary-Scan-Register.png)  
-![](https://i.ibb.co/64xYs5c/Boundary-Scan-Register-Sample.png)
+![](https://i.ibb.co/6DTdbcC/Boundary-Scan-Register-Sample.png)
 <div align="center">
   Figure 4. Boundary Scan Register from [6.] pg9 
 </div>  
