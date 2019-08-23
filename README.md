@@ -50,7 +50,7 @@ Besides, there's another way to get IDCODE of JTAG device that is reset the TAP 
 
 ### 3. SAMPLE/PRELOAD
 This instruction is required by IEEE Standard 1149.1. This instruction connect `TDI` and `TDO` through the `Boundary scan register`.  
-This instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
+Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
 ![Boundary Scan Register Sample/Preload](https://i.ibb.co/YDsHXfp/ezgif-com-gif-maker-1.gif)  
 
@@ -58,11 +58,20 @@ This instruction allows user to take a snapshot of the system I/O pins witout af
   Gif 1. Boundary Scan Register from [6.] pg9 
 </div>  
 
-By default(no shifting), the input pin data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `INJ` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
+By default(no shifting), the input pin (PIN_IN) data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
 After capturing the data(SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
-pin can be shifted in from `TDI` so that the preload data can be used for `EXTEST` instruction.
+pin can be shifted in from `TDI`. After shifting the correct test pattern, then go to `UPDATE_DR` state to update the data to 
+`Update Registers`. The preloaded data is now ready for `EXTEST` instruction.
 
-### 4. EXTEST
+### 4. EXTEST  
+This instruction is also a compulsory instruction by IEEE Standard 1149.1. This instruction is often used to test the external
+circuitry of the device. For example,
+![alt text](https://i.ibb.co/hKqxy4k/Capture.png "Connection between chips")
+<div align="center">
+  Figure 4. Example of EXTEST from [2.]
+</div>  
+Based the circuitry on Figure 4. , EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips.  
+
 ![Boundary Scan Register Extest](https://i.ibb.co/XLz80cc/ezgif-com-gif-maker-2.gif)  
 <div align="center">
   Gif 2. Boundary Scan Register from [6.] pg9 
