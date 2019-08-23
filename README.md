@@ -42,7 +42,9 @@ By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` 
 one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
 than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
-Besides, there's another way to get IDCODE of JTAG device that is reset the TAP state machine to TEST_LOGIC_RESET state.
+Besides, there's another way to get IDCODE of JTAG device that is reset the TAP state machine to TEST_LOGIC_RESET state. By resetting
+the Tap state machine, the IDCODE instruction will be loaded automatically into `Instruction Register`.
+
 ![read IDCODE after reset](https://i.ibb.co/FVH7ggz/reset-Read-IDCOde.png)  
 <div align="center">
   Figure 3. Read IDCODE after reset TAP State Machine from [5.] pg5 
@@ -80,6 +82,8 @@ results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.
 <div align="center">
   Gif 2. Boundary Scan Register from [6.] pg9 
 </div>  
+
+Before using `EXTEST` instruction, the test pattern must be preloaded with `SAMPLE/PRELOAD` instruction. After loading `EXTEST` instruction, go to `CAPTURE_DR` state. In this state, the preloaded data at `Update Registers` will drive `INJ`, `PIN_OE`and `PIN_OUT`.
 
  by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
 the TAP state machine enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
