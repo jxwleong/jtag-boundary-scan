@@ -93,10 +93,7 @@ further `EXTEST` is desired.
 <div align="center">
   Figure 5. Example of JTAG waveform from [6.] pg25  
 </div>  
-Based on the documentation on [5.] pg10, when the TAP controller
- by applying `TMS` signals of `1` and a clock pulse of `TCK`. When 
-the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead,
-at the second `TCK` clock cycle, `TDI` and `TDO` is shifted.
+Based on the documentation on [5.] pg10, when the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted.
 
 ## References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
