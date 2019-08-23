@@ -1,4 +1,8 @@
-## What is this repo about?
+## Summary
+1.  [What is this repo about?](#repoIntro)
+
+
+## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
 IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.
 
