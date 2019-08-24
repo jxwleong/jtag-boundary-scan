@@ -97,6 +97,21 @@ void commandLineOperation(char *commandStr){
 		bSCPinConfigure(&bsc1, BSReg, OUTPUT_PIN);
 		bSCExtestGpioPin(&bsc1, BSReg, tempLL);
 	}
+	else if(strstr(commandStr, "jtag load IR") != '\0'){
+		bypassCharactersInStr(&commandStr, 12);
+		tempLL = getNumberFromStr(&commandStr);	// get input from user
+		length = getDataLengthFromStr(&commandStr);
+		loadJtagIR(tempLL, length, RUN_TEST_IDLE);
+
+	}
+	else if(strstr(commandStr, "jtag load DR") != '\0'){
+		bypassCharactersInStr(&commandStr, 12);
+		tempLL = getNumberFromStr(&commandStr);	// get input from user
+		length = getDataLengthFromStr(&commandStr);
+		ans = jtagWriteAndRead(tempLL, length);
+		ansStr = decimalToBinaryInStr(ans, length);
+		sprintf(tempBuffer, "Result:  0b%s \n\n", ansStr);
+	}
 	else if(!(strcasecmp(commandStr, "help"))){
 		sprintf(tempBuffer, "\nIDCODE \
 							 \n------\
