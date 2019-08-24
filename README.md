@@ -56,9 +56,16 @@ than one JTAG device, then the total number of bits to shift is `shift bits = n 
 Besides, there's another way to get IDCODE of JTAG device that is reset the TAP controller to TEST_LOGIC_RESET state. By resetting
 the Tap state machine, the IDCODE instruction will be loaded automatically into `Instruction Register`.
 
-![read IDCODE after reset](https://i.ibb.co/FVH7ggz/reset-Read-IDCOde.png)  
+```
+After reset, you can read the Device ID Register (default). To perform any other action, you must move 
+the TAP to the Instruction Register scan cycle to select an appropriate data register. For either type
+of scan cycle (data register or instruction register), the first action in the scan cycle is a capture 
+operation. The Capture-DR state enables the data register indicated by the current Instruction 
+Register contents. The Capture-IR state enables access to the Instruction Register.
+```
+ 
 <div align="center">
-  Figure 3. Read IDCODE after reset TAP State Machine from [5.] pg5 
+  Snippet 1. Read IDCODE after reset TAP State Machine from [5.] pg5 
 </div>  
 
 ### <a name="samPre"></a> 3. SAMPLE/PRELOAD
@@ -108,9 +115,20 @@ further `EXTEST` is desired.
 </div>  
 
 When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By refering from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
+```
+During the SHIFT_IR state, an instruction code is entered by shifting data
+on the TDI pin on the rising edge of TCK. The last bit of the opcode must
+be clocked at the same time that the next state, EXIT1_IR, is activated;
+EXIT1_IR is entered by clocking a logic high on TMS. Once in the
+EXIT1_IR state, TDO becomes tri-stated again. TDO is always tri-stated
+except in the SHIFT_IR and SHIFT_DR states. After an instruction code
+is entered correctly, the TAP controller advances to perform the serial
+shifting of test data in one of three modes—SAMPLE/PRELOAD,
+EXTEST, or BYPASS—that are described below.
+```
 ![Last shift on next TAP state](https://i.ibb.co/pd5mFcy/jtag-io-signals.png)
 <div align="center">
-  Figure 6. Documentation from [6.] pg25  
+  Snippet 2. Documentation from [6.] pg25  
 </div>  
   
 Based on Figure6. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.
