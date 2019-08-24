@@ -150,7 +150,7 @@ pads of the device are wired to external pins.
 * **IDCODE Register**: This entity specified the device specific IDCODE number of the device.  
 
 ### <a name="bsdlHowTo"></a> How to read BSDL?  
-## <a name=instructNLength></a> Instruction Opcode and length
+#### <a name=instructNLength></a> Instruction Opcode and length
 ```vhdl
 -- Specifies the number of bits in the instruction register.
 
@@ -166,9 +166,14 @@ pads of the device are wired to external pins.
      "IDCODE  (00001)";
 ```  
 <div align="center">
-  Snippet 3. Boundary Scan Instruction code and length 
+  Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-
+By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:
+* **BYPASS** : 5b11111  
+* **EXTEST** : 5b00000 
+* **SAMPLE** : 5b00010  
+* **PRELOAD** : 5b00010  
+* **IDCODE**  : 5b0001  
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
