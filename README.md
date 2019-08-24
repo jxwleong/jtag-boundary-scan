@@ -7,7 +7,7 @@
     3. [SAMPLE/PRELOAD](#samPre)
     4. [EXTEST](#extest)
 4.  [JTAG I/O signals](#ioSig) 
-5.  [Boundary scan description language(BSDL)](#bsdl)
+5.  [Boundary Scan Description Language(BSDL)](#bsdl)
     1. [What is BSDL?](#bsdlIntro)
     2. [How to read BSDL](#bsdlHowTo)
 6.  [References](#refer)   
@@ -17,8 +17,7 @@ This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this
 IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.
 
 ## <a name="jtagIntro"></a> What is JTAG?
-JTAG is an industrial standard for testing and verifying PCB designs after fabricate. Besides that, JTAG is often used as an debugger
-for hardware such as microcontroller like STM32F103C8T6.
+JTAG is an industrial standard for testing and verifying PCB designs after fabricate (Boundary Scan). Besides that, JTAG is often used as an debugger for hardware such as microcontroller like STM32F103C8T6.
 
 ![JTAG Register](https://trello-attachments.s3.amazonaws.com/5d00bb8cf5abae679851c1e1/663x747/aaf8d3e3d635433cda69bcc63c7b9f44/Instruction-decoder.png)  
 
@@ -136,8 +135,12 @@ EXTEST, or BYPASS—that are described below.
   
 Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.  
 
-## <a name="bsdl"></a> BSDL 
+## <a name="bsdl"></a> Boundary Scan Description Language (BSDL) 
 ### <a name="bsdlIntro"></a> What is BSDL?  
+BSDL is a subset of VHDL which is a hardware description language which provide description on how a particular JTAG device need be
+be implemented for boundary scan. There are a few important informations that need to be extract from BSDL file for performing
+boundary scan such as:  
+* **Device instructions opcode**:
 ### <a name="bsdlHowTo"></a> How to read BSDL?  
 
 ## <a name="refer"></a> References
@@ -148,3 +151,5 @@ Based on Snippet 2. , on the last bit of data shift, it must be on the next stat
 [5.] [DSP56300 JTAG Examples](https://www.nxp.com/docs/en/application-note/AN2074.pdf)  
 [6.] [AN 39: IEEE 1149.1 (JTAG) Boundary-Scan Testing in Altera Devices
 ](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/an/an039.pdf)  
+[7.] [BSDL Files](https://www.xjtag.com/about-jtag/bsdl-files/)
+[8.] [BSDL Tutorial](https://www.corelis.com/education/tutorials/bsdl-tutorial/#What_is_BSDL)
