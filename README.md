@@ -9,7 +9,8 @@
 4.  [JTAG I/O signals](#ioSig) 
 5.  [Boundary Scan Description Language(BSDL)](#bsdl)
     1. [What is BSDL?](#bsdlIntro)
-    2. [How to read BSDL](#bsdlHowTo)
+    2. [How to read BSDL?](#bsdlHowTo)
+        1. [Insturction opcode and length](#instructNLength)  
 6.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
@@ -140,18 +141,34 @@ Based on Snippet 2. , on the last bit of data shift, it must be on the next stat
 BSDL is a subset of VHDL which is a hardware description language which provide description on how a particular JTAG device need be
 be implemented for boundary scan. There are a few important informations that need to be extract from BSDL file for performing
 boundary scan such as:  
-* **Device instructions opcode**: Instruction opcode in binary and length to perform boundary scan. 
+* **Device Instructions Opcode**: JTAG boudary  scan instruction opcode and length of the device in binary to perform boundary scan. 
+* **Boundary Scan Description**: This description provide the information about the structure of boundary scan cell of the device. 
+Most pin on a device will have three boundary scan cells, input, output and control. It also describe what state of the cells pin
+are need to perform boundary scan instructions.  
+* **Package Pin  Mapping**:  This is used to determine the internal connections within an integrated circuit. It also describe how the
+pads of the device are wired to external pins.  
+* **IDCODE Register**: This entity specified the device specific IDCODE number of the device.  
+
 ### <a name="bsdlHowTo"></a> How to read BSDL?  
+## <a name=instructNLength></a> Instruction Opcode and length
 ```vhdl
--- Specifies the bit pattern that is loaded into the DEVICE_ID register during the IDCODE 
--- instruction when the TAP controller passes through the Capture-DR state.
+-- Specifies the number of bits in the instruction register.
+
+   attribute INSTRUCTION_LENGTH of STM32F1_Low_Med_density_value_LQFP48 : entity is 5;
+
+-- Specifies the boundary-scan instructions implemented in the design and their opcodes.
    
-   attribute IDCODE_REGISTER of STM32F1_Low_Med_density_value_LQFP48 : entity is 
-     "XXXX" &              -- 4-bit version number
-     "0110010000100000" &  -- 16-bit part number -- 420
-     "00000100000" &       -- 11-bit identity of the manufacturer
-     "1";
-```
+   attribute INSTRUCTION_OPCODE of STM32F1_Low_Med_density_value_LQFP48 : entity is 
+     "BYPASS  (11111)," &
+     "EXTEST  (00000)," &
+     "SAMPLE  (00010)," &
+     "PRELOAD (00010)," &
+     "IDCODE  (00001)";
+```  
+<div align="center">
+  Snippet 3. Boundary Scan Instruction code and length 
+</div> 
+
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
