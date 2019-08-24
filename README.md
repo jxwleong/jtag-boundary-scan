@@ -32,7 +32,7 @@ Based on Figure 1. , Any JTAG devices will have at least 4 I/O pin (TCK, TMS, TD
 project, only 4 I/O pins were used.  
   
 With so many data lines connected to the device, a controller unit is needed to tell the JTAG device what to do. That control unit is named
-Test Access Port(TAP) controller.
+Test Access Port (TAP) controller.
 
 ![
 Machine](https://www.xjtag.com/wp-content/uploads/tap_state_machine.gif)  
@@ -83,8 +83,8 @@ Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/
   Gif 1. Boundary Scan Register from [6.] pg 9 
 </div>  
 
-By default(no shifting), the input pin (PIN_IN) data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
-After capturing the data(SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
+By default (no shifting), the input pin (PIN_IN) data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
+After capturing the data (SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
 pin can be shifted in from `TDI`. After shifting the correct test pattern, then go to `UPDATE_DR` state to update the data to 
 `Update Registers`. The preloaded data is now ready for `EXTEST` instruction.
 
@@ -248,9 +248,12 @@ Based on Snippet 5. , the length of boundary scan register is 232. This means th
 </div>  
   
 Based on Snippet 6. , for  
-**SAMPLE**  
-In this case, we want to sample the current input status of pin `PC13`. 
-> Note that
+**SAMPLE/PRELOAD**  
+In this case, we want to sample the current input status of pin `PC13`. Note the `disval` of cell 215. To disable the output enable, cell 215 need to set to 1. By referring Gif 1. at [here](#samPre), when `CONTROL` register is set to HIGH (1), the tri-state output will be disable. Thus, the input data of pin PC13 can be captured.  
+ 
+**EXTEST**  
+Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval` description of control cell (215), to enable the tri-state output buffer, `CONTROL` register is set to LOW (0) so that the preloaded data at `Update Register` of `OUTPUT` can be drive to pin PC13. For more info on how `EXTEST` work, please click [here](#extest).
+
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
