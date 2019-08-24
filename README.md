@@ -111,7 +111,7 @@ The next test pattern can be shift in by apply `TMS` of 1 and a pulse of `TCK` t
 to `UPDATE_DR` state to update the `Update Registers` with latest test pattern. Repeat the process by going to `CAPTURE_DR` state if
 further `EXTEST` is desired.  
 
-**Note, me and my [supervisor](https://github.com/chaosAD) noticed that when `EXTEST` instruction is loaded first time, it works fine. But when trying to reload the EXTEST instruction for another test. The MCU seems to regain control of the pin and cause unexpected behaviour. To solve this, if the EXTEST instruction is already loaded and directly shift the data from TDI and TDO. In short, if multiple EXTEST is needed, make sure don't reload the instruction register.**
+> **Note, me and my [supervisor](https://github.com/chaosAD) noticed that when `EXTEST` instruction is loaded first time, it works fine. But when trying to reload the EXTEST instruction for another test. The MCU seems to regain control of the pin and cause unexpected behaviour. To solve this, if the EXTEST instruction is already loaded and directly shift the data from TDI and TDO. In short, if multiple EXTEST is needed, make sure don't reload the instruction register.**
 
 ## <a name="ioSig"></a> JTAG I/O signals
 ![Example of JTAG waveform](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d01a23eae083935945dcb4a/af60b1f0e726cff13dfc213a915b40b6/jtagWave.png)
@@ -136,7 +136,8 @@ EXTEST, or BYPASS—that are described below.
   Snippet 2. Documentation from [6.] pg 25  
 </div>  
   
-Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.  
+Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. 
+> Note that the same principle apply to shifting of data and instruction.  
 
 ## <a name="bsdl"></a> Boundary Scan Description Language (BSDL) 
 ### <a name="bsdlIntro"></a> What is BSDL?  
@@ -215,7 +216,7 @@ But by referring Figure 6. , the actual JTAG boundary scan device IDCODE is `0x1
   Snippet 5. Device IDCODE from [9.] line 185
 </div>  
   
-Base on Snippet 5. , the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
+Based on Snippet 5. , the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
    
 ```vhdl
 -- The following list specifies the characteristics of each cell in the boundary scan register from 
@@ -246,7 +247,10 @@ Base on Snippet 5. , the length of boundary scan register is 232. This means tha
   Snippet 6. Boundary Scan Cell Sturture from [9.] line 189
 </div>  
   
-
+Based on Snippet 6. , for  
+**SAMPLE**  
+In this case, we want to sample the current input status of pin `PC13`. 
+> Note that
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
