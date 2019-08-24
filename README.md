@@ -6,8 +6,11 @@
     2. [IDCODE](#idcode)
     3. [SAMPLE/PRELOAD](#samPre)
     4. [EXTEST](#extest)
-4.  [JTAG I/O signals](#ioSig)    
-5.  [References](#refer)   
+4.  [JTAG I/O signals](#ioSig) 
+5.  [Boundary scan description language(BSDL)](#bsdl)
+    1. [What is BSDL?](#bsdlIntro)
+    2. [How to read BSDL](#bsdlHowTo)
+6.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
@@ -62,7 +65,7 @@ the TAP to the Instruction Register scan cycle to select an appropriate data reg
 of scan cycle (data register or instruction register), the first action in the scan cycle is a capture 
 operation. The Capture-DR state enables the data register indicated by the current Instruction 
 Register contents. The Capture-IR state enables access to the Instruction Register.
-```
+```  
  
 <div align="center">
   Snippet 1. Read IDCODE after reset TAP State Machine from [5.] pg5 
@@ -131,7 +134,11 @@ EXTEST, or BYPASS—that are described below.
   Snippet 2. Documentation from [6.] pg25  
 </div>  
   
-Based on Figure6. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.
+Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.  
+
+## <a name="bsdl"></a> BSDL 
+### <a name="bsdlIntro"></a> What is BSDL?  
+### <a name="bsdlHowTo"></a> How to read BSDL?  
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
