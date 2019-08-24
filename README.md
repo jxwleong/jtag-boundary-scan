@@ -126,7 +126,7 @@ is entered correctly, the TAP controller advances to perform the serial
 shifting of test data in one of three modes—SAMPLE/PRELOAD,
 EXTEST, or BYPASS—that are described below.
 ```
-![Last shift on next TAP state](https://i.ibb.co/pd5mFcy/jtag-io-signals.png)
+
 <div align="center">
   Snippet 2. Documentation from [6.] pg25  
 </div>  
