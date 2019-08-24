@@ -218,8 +218,6 @@ But by referring Figure 6. , the actual JTAG boundary scan device IDCODE is `0x1
 Base on Snippet 5. , the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
    
 ```vhdl
-
- 
 -- The following list specifies the characteristics of each cell in the boundary scan register from 
 -- TDI to TDO. The following is a description of the label fields:
 --      num     : Is the cell number.
@@ -239,7 +237,15 @@ Base on Snippet 5. , the length of boundary scan register is 232. This means tha
 --     
 --    num	cell	port		function	safe  [ccell  disval  rslt]
 --
+                ...
+      "216	(BC_1,	*,		CONTROL,	1),				" &
+      "215	(BC_1,	PC13,		OUTPUT3,	X,	216,	1,	Z),	" &
+      "214	(BC_4,	PC13,		INPUT,		X),				" &      
 ```  
+<div align="center">
+  Snippet 6. Boundary Scan Cell Sturture from [9.] line 189
+</div>  
+  
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
