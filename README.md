@@ -70,7 +70,7 @@ Register contents. The Capture-IR state enables access to the Instruction Regist
 ```  
  
 <div align="center">
-  Snippet 1. Read IDCODE after reset TAP State Machine from [5.] pg5 
+  Snippet 1. Read IDCODE after reset TAP State Machine from [5.] pg 5 
 </div>  
 
 ### <a name="samPre"></a> 3. SAMPLE/PRELOAD
@@ -80,7 +80,7 @@ Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/
 ![Boundary Scan Register Sample/Preload](https://i.ibb.co/YDsHXfp/ezgif-com-gif-maker-1.gif)  
 
 <div align="center">
-  Gif 1. Boundary Scan Register from [6.] pg9 
+  Gif 1. Boundary Scan Register from [6.] pg 9 
 </div>  
 
 By default(no shifting), the input pin (PIN_IN) data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
@@ -103,7 +103,7 @@ results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.
 
 ![Boundary Scan Register Extest](https://i.ibb.co/XLz80cc/ezgif-com-gif-maker-2.gif)  
 <div align="center">
-  Gif 2. Boundary Scan Register from [6.] pg9 
+  Gif 2. Boundary Scan Register from [6.] pg 9 
 </div>  
 
 Before using `EXTEST` instruction, the test pattern must be preloaded with `SAMPLE/PRELOAD` instruction. After loading `EXTEST` instruction, go to `CAPTURE_DR` state. In this state, the preloaded data at `Update Registers` will drive `INJ`, `PIN_OE`and `PIN_OUT`.
@@ -116,7 +116,7 @@ further `EXTEST` is desired.
 ## <a name="ioSig"></a> JTAG I/O signals
 ![Example of JTAG waveform](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d01a23eae083935945dcb4a/af60b1f0e726cff13dfc213a915b40b6/jtagWave.png)
 <div align="center">
-  Figure 5. Example of JTAG waveform from [6.] pg25  
+  Figure 5. Example of JTAG waveform from [6.] pg 25  
 </div>  
 
 When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By referring from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
@@ -133,7 +133,7 @@ EXTEST, or BYPASS—that are described below.
 ```
 
 <div align="center">
-  Snippet 2. Documentation from [6.] pg25  
+  Snippet 2. Documentation from [6.] pg 25  
 </div>  
   
 Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. Note that the same principle apply to shifting of data and instrction.  
@@ -198,19 +198,24 @@ Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary `0bXX
 
 ![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
 <div align="center">
-  Figure 6. Booundary Scan IDCODE from [10.] pg1086
+  Figure 6. Booundary Scan IDCODE from [10.] pg 1086
 </div>   
   
   
   
-But by referring Figure 6. , the actual JTAG Boundary Scan Device IDCODE is `0x16410041` which is `0b1 0110 0100 0001 0000 0000 0100 0001` in binary.  
+But by referring Figure 6. , the actual JTAG boundary scan device IDCODE is `0x16410041` which is `0b1 0110 0100 0001 0000 0000 0100 0001` in binary.  
+  
 #### <a name=bscinfo></a> Boundary Scan Cells and Registers Informations  
 ```vhdl
 -- Specifies the length of the boundary scan register.
    
    attribute BOUNDARY_LENGTH of STM32F1_Low_Med_density_value_LQFP48 : entity is 232;
 ```
-
+<div align="center">
+  Snippet 5. Device IDCODE from [9.] line 185
+</div>  
+  
+Base on Snippet 5. , the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
    
 ```vhdl
 
