@@ -168,7 +168,7 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:
+By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:  
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
 * **SAMPLE** : 5b00010  
