@@ -11,7 +11,8 @@
     1. [What is BSDL?](#bsdlIntro)
     2. [How to read BSDL?](#bsdlHowTo)
         1. [Insturction opcode and length](#instructNLength)  
-        1. [Device IDCODE](#deviceID) 
+        2. [Device IDCODE](#deviceID) 
+        3. [Boundary Scan Cells and Registers Informations](#bscinfo)
 6.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
@@ -170,13 +171,13 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snipper3. , the instruction length of this device is 5-bit. The instruction opcode was also stated clearly which is:<br/>
+By referring the attributed on Snippet 3. , the instruction length of this device is 5-bit. The instruction opcode was also stated clearly which is:<br/>
     
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
 * **SAMPLE** : 5b00010  
 * **PRELOAD** : 5b00010  
-* **IDCODE**  : 5b0001  
+* **IDCODE**  : 5b00001  
 
 #### <a name=deviceID></a> Device IDCODE
 ```vhdl
@@ -193,7 +194,7 @@ By referring the attributed on Snipper3. , the instruction length of this device
   Snippet 4. Device IDCODE from [9.] line 168
 </div>  
   
-Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary ``0bXXXX 0110 0100 0010 0000 0000 0100 0001`` and in hex form is `0xX6420041`.  
+Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary `0bXXXX 0110 0100 0010 0000 0000 0100 0001` and in hex form is `0xX6420041`.  
 
 ![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
 <div align="center">
@@ -202,8 +203,38 @@ Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary ``0bX
   
   
   
-But by referring Figure 6. , the actual JTAG Boundary Scan Device IDCODE is `0x16410041`.
+But by referring Figure 6. , the actual JTAG Boundary Scan Device IDCODE is `0x16410041` which is `0b1 0110 0100 0001 0000 0000 0100 0001` in binary.  
+#### <a name=bscinfo></a> Boundary Scan Cells and Registers Informations  
+```vhdl
+-- Specifies the length of the boundary scan register.
    
+   attribute BOUNDARY_LENGTH of STM32F1_Low_Med_density_value_LQFP48 : entity is 232;
+```
+
+   
+```vhdl
+
+ 
+-- The following list specifies the characteristics of each cell in the boundary scan register from 
+-- TDI to TDO. The following is a description of the label fields:
+--      num     : Is the cell number.
+--      cell    : Is the cell type as defined by the standard.
+--      port    : Is the design port name. Control cells do not have a port name.
+--      function: Is the function of the cell as defined by the standard. Is one of input, output2, 
+--                output3, bidir, control or controlr.
+--      safe    : Specifies the value that the BSR cell should be loaded with for safe operation 
+--                when the software might otherwise choose a random value.
+--      ccell   : The control cell number. Specifies the control cell that drives the output enable 
+--                for this port.
+--      disval  : Specifies the value that is loaded into the control cell to disable the output 
+--                enable for the corresponding port.
+--      rslt    : Resulting state. Shows the state of the driver when it is disabled.
+   
+   attribute BOUNDARY_REGISTER of STM32F1_Low_Med_density_value_LQFP48 : entity is 
+--     
+--    num	cell	port		function	safe  [ccell  disval  rslt]
+--
+```  
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
