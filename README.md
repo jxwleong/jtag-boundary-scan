@@ -118,7 +118,7 @@ further `EXTEST` is desired.
   Figure 5. Example of JTAG waveform from [6.] pg25  
 </div>  
 
-When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By refering from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
+When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By referring from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
 ```
 During the SHIFT_IR state, an instruction code is entered by shifting data
 on the TDI pin on the rising edge of TCK. The last bit of the opcode must
@@ -170,7 +170,7 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:<br/>
+By referring the attributed on Snipper3. , the instruction length of this device is 5-bit. The instruction opcode was also stated clearly which is:<br/>
     
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
@@ -191,7 +191,17 @@ By referring the attributed on Snipper3. , the instruction length of this device
 ```  
 <div align="center">
   Snippet 4. Device IDCODE from [9.] line 168
-</div> 
+</div>  
+  
+Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary ``0bXXXX 0110 0100 0010 0000 0000 0100 0001`` and in hex form is `0xX6420041`.  
+
+![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
+<div align="center">
+  Figure 6. Booundary Scan IDCODE from [10.] pg1086
+</div>  
+  
+But by referring Figure 6. , the actual JTAG Boundary Scan Device IDCODE is `0x16410041`.
+   
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
