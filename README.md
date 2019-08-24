@@ -11,6 +11,7 @@
     1. [What is BSDL?](#bsdlIntro)
     2. [How to read BSDL?](#bsdlHowTo)
         1. [Insturction opcode and length](#instructNLength)  
+        1. [Device IDCODE](#deviceID) 
 6.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
@@ -169,15 +170,15 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:     
-boundary scan such as:  
-  
+By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:<br/>
+    
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
 * **SAMPLE** : 5b00010  
 * **PRELOAD** : 5b00010  
 * **IDCODE**  : 5b0001  
 
+#### <a name=deviceID></a> Device IDCODE
 ```vhdl
 -- Specifies the bit pattern that is loaded into the DEVICE_ID register during the IDCODE 
 -- instruction when the TAP controller passes through the Capture-DR state.
@@ -187,8 +188,10 @@ boundary scan such as:
      "0110010000100000" &  -- 16-bit part number -- 420
      "00000100000" &       -- 11-bit identity of the manufacturer
      "1";                  -- Required by IEEE Std 1149.1
- 
 ```  
+<div align="center">
+  Snippet 4. Device IDCODE from [9.] line 168
+</div> 
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
