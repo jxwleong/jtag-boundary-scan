@@ -140,8 +140,18 @@ Based on Snippet 2. , on the last bit of data shift, it must be on the next stat
 BSDL is a subset of VHDL which is a hardware description language which provide description on how a particular JTAG device need be
 be implemented for boundary scan. There are a few important informations that need to be extract from BSDL file for performing
 boundary scan such as:  
-* **Device instructions opcode**:
+* **Device instructions opcode**: Instruction opcode in binary and length to perform boundary scan. 
 ### <a name="bsdlHowTo"></a> How to read BSDL?  
+```vhdl
+-- Specifies the bit pattern that is loaded into the DEVICE_ID register during the IDCODE 
+-- instruction when the TAP controller passes through the Capture-DR state.
+   
+   attribute IDCODE_REGISTER of STM32F1_Low_Med_density_value_LQFP48 : entity is 
+     "XXXX" &              -- 4-bit version number
+     "0110010000100000" &  -- 16-bit part number -- 420
+     "00000100000" &       -- 11-bit identity of the manufacturer
+     "1";
+```
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
@@ -151,5 +161,6 @@ boundary scan such as:
 [5.] [DSP56300 JTAG Examples](https://www.nxp.com/docs/en/application-note/AN2074.pdf)  
 [6.] [AN 39: IEEE 1149.1 (JTAG) Boundary-Scan Testing in Altera Devices
 ](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/an/an039.pdf)  
-[7.] [BSDL Files](https://www.xjtag.com/about-jtag/bsdl-files/)
-[8.] [BSDL Tutorial](https://www.corelis.com/education/tutorials/bsdl-tutorial/#What_is_BSDL)
+[7.] [BSDL Files](https://www.xjtag.com/about-jtag/bsdl-files/)  
+[8.] [BSDL Tutorial](https://www.corelis.com/education/tutorials/bsdl-tutorial/#What_is_BSDL)  
+[9.] [STM32F1_Low_Med_density_value_LQFP48.bsd](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cee300601299d2ce2c732fd/2e138503f7ce2022af8ae01e40947948/STM32F1_Low_Med_density_value_LQFP48.bsd)
