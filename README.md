@@ -198,7 +198,9 @@ Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary ``0bX
 ![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
 <div align="center">
   Figure 6. Booundary Scan IDCODE from [10.] pg1086
-</div>  
+</div>   
+  
+  
   
 But by referring Figure 6. , the actual JTAG Boundary Scan Device IDCODE is `0x16410041`.
    
