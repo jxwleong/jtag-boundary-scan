@@ -141,6 +141,7 @@ Based on Snippet 2. , on the last bit of data shift, it must be on the next stat
 BSDL is a subset of VHDL which is a hardware description language which provide description on how a particular JTAG device need be
 be implemented for boundary scan. There are a few important informations that need to be extract from BSDL file for performing
 boundary scan such as:  
+
 * **Device Instructions Opcode**: JTAG boudary  scan instruction opcode and length of the device in binary to perform boundary scan. 
 * **Boundary Scan Description**: This description provide the information about the structure of boundary scan cell of the device. 
 Most pin on a device will have three boundary scan cells, input, output and control. It also describe what state of the cells pin
@@ -168,12 +169,26 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:  
+By referring the attributed on Snipper3. , the instruction length of this device is 5-bit(`INSTRUCTION_LENGTH`). The instruction opcode was also stated clearly which is:   
+  
+  
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
 * **SAMPLE** : 5b00010  
 * **PRELOAD** : 5b00010  
 * **IDCODE**  : 5b0001  
+
+```vhdl
+-- Specifies the bit pattern that is loaded into the DEVICE_ID register during the IDCODE 
+-- instruction when the TAP controller passes through the Capture-DR state.
+   
+   attribute IDCODE_REGISTER of STM32F1_Low_Med_density_value_LQFP48 : entity is 
+     "XXXX" &              -- 4-bit version number
+     "0110010000100000" &  -- 16-bit part number -- 420
+     "00000100000" &       -- 11-bit identity of the manufacturer
+     "1";                  -- Required by IEEE Std 1149.1
+ 
+```  
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
