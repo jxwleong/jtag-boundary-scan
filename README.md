@@ -267,11 +267,16 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 
 ### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
 
-**1. Instruction opcode for different TAP devices** 
+**1. Instruction opcode for different TAP devices**  
+
 | Instruction(binary)/ TAP devices 	| IDCODE 	| BYPASS 	| SAMPLE/PERLOAD 	| EXTEST 	|
 |----------------------------------	|:------:	|--------	|----------------	|--------	|
 | Boundary Scan TAP                	|  00001 	|  11111 	|      00010     	|  00000 	|
-| Cortex-M3 TAP                    	|  1110  	|  1111  	|    0001/0010   	|  0000  	|
+| Cortex-M3 TAP                    	|  1110  	|  1111  	|    0001/0010   	|  0000  	|  
+
+<div align="center">
+  Table 1. The JTAG instructions opcode for two TAP devices in STM32F103C8T6 from [Insturction opcode and length for Boundary Scan TAP](#instructNLength)  
+</div>  
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
