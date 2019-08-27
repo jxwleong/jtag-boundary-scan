@@ -15,8 +15,16 @@
         3. [Boundary Scan Cells and Registers Informations](#bscinfo)
 6.  [Result](#result)
     1. [Information required for JTAG Boundary Scan](#infoBoundaryScan)  
-    2. [System Workbench for STM32](#stm32Workbench)
-    3. [Command-line interface (CLI)](#cli)
+    2. [Result for System Workbench for STM32](#stm32Workbench)
+        1. [IDCODE](#wbIDCODE)
+        2. [BYPASS](#wbBYPASS)
+        3. [SAMPLE/PRELOAD](#wbSAMPLE_PRELOAD)
+        4. [EXTEST](#wbEXTEST)
+    3. [Result for Command-line interface (CLI)](#cli)
+        1. [IDCODE](#cliIDCODE)
+        2. [BYPASS](#cliBYPASS)
+        3. [SAMPLE/PRELOAD](#cliSAMPLE_PRELOAD)
+        4. [EXTEST](#cliEXTEST)
 7.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
@@ -292,16 +300,33 @@ Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3
 
 | BoundaryScanCell/ JTAG Instruction 	| INPUT 	| OUTPUT 	| CONTROL 	|
 |------------------------------------	|-------	|--------	|---------	|
-| SAMPLE/PRELOAD                     	|  0/1  	|    x   	|    1    	|
+| SAMPLE/PRELOAD                     	|  0/1  	|   0/1   	|    1    	|
 | EXTEST                             	|   x   	|   0/1  	|    0    	|  
-> For **SAMPLE/PRELOAD** instruction, INPUT cell (0/1) is set by user externally and CONTROL is preloaded.  
+> For **SAMPLE/PRELOAD** instruction, INPUT and OUTPUT cell (0/1) is set by user externally and CONTROL is preloaded.  
 > For **EXTEST** instruction, OUTPUT cell (0/1) and CONTROL was set by user by preloading the data using **SAMPLE/PRELOAD**.
 <div align="center">
   Table 2. Data to be preloaded to boundary scan register respect with to instructions.
 </div>  
 
+By referring to [Boundary Scan Cells and Registers Informations](#bscinfo), we know that the length of boundary scan cell is `232` which mean that we need to shift in 232 bits via TDI. Basically, a I/O is connected to three boundary scan cells (INPUT, OUTPUT and CONTROL). Depend on which instruction used, the datat shift in for boundary scan cells are different.  
+
+*1. SAMPLE/PRELOAD*  
+To sample the INPUT boundary scan cell state (0/1). The CONTROL cell are set to 1 to disable the output enable. At the same time, the data wanted to be preload for EXTEST can shift in at the same time.  
+
+*2. EXTEST*  
+To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 to enable the output enable. Then, the desired OUTPUT state (0/1) preloaded can be drive to the I/O pin.  
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
+### <a name="wbIDCODE"></a> **1. IDCODE**  
+### <a name="wbBYPASS"></a> **2. BYPASS**  
+### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+### <a name="wbEXTEST"></a> **4. EXTEST**  
+
 ### <a name="cli"></a> Command-line interface (CLI) 
+### <a name="cliIDCODE"></a> **1. IDCODE**  
+### <a name="cliBYPASS"></a> **2. BYPASS**  
+### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+### <a name="cliEXTEST"></a> **4. EXTEST**   
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
@@ -315,7 +340,4 @@ Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3
 [8.] [BSDL Tutorial](https://www.corelis.com/education/tutorials/bsdl-tutorial/#What_is_BSDL)  
 [9.] [STM32F1_Low_Med_density_value_LQFP48.bsd](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cee300601299d2ce2c732fd/2e138503f7ce2022af8ae01e40947948/STM32F1_Low_Med_density_value_LQFP48.bsd)  
 [10.] [STM32F101xx, STM32F102xx, STM32F103xx, STM32F105xx and STM32F107xx advanced Arm®-based 32-bit MCUs - Reference manual](https://www.st.com/content/ccc/resource/technical/document/reference_manual/59/b9/ba/7f/11/af/43/d5/CD00171190.pdf/files/CD00171190.pdf/jcr:content/translations/en.CD00171190.pdf)  
-[11.] [ARM®
- Debug Interface
-Architecture Specification
-ADIv5.0 to ADIv5.2](https://static.docs.arm.com/ihi0031/c/IHI0031C_debug_interface_as.pdf)
+[11.] [ARM® Debug Interface Architecture Specification ADIv5.0 to ADIv5.2](https://static.docs.arm.com/ihi0031/c/IHI0031C_debug_interface_as.pdf)
