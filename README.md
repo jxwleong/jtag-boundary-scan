@@ -258,6 +258,11 @@ In this case, we want to sample the current input status of pin `PC13`. Note the
 Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval` description of control cell (215), to enable the tri-state output buffer, `CONTROL` register is set to LOW (0) so that the preloaded data at `Update Register` of `OUTPUT` can be drive to pin PC13. For more info on how `EXTEST` work, please click [here](#extest).  
 
 ## <a name="result"></a> Result  
+![JTAG Architecture for STM32F103xx](https://trello-attachments.s3.amazonaws.com/5d0ad54197302875cae43986/577x380/bb87a975c30916ed276583988f1eab23/JTAG_Architecture.jpg)   
+<div align="center">
+  Figure 7.JTAG Architecture for STM32F103xx from [10.] pg 1084  
+</div>    
+There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be consider. 
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
