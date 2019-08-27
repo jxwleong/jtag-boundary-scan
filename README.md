@@ -277,7 +277,8 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 <div align="center">
   Table 1. The JTAG instructions opcode for two TAP devices in STM32F103C8T6 from [9.] line 149 and [11.] pg75-76
 </div>  
-When doing boundary scan instruction such as 'SAMPLE/PRELOAD' and 'EXTEST', the boundary scan instruction will be loaded into Boudary Scan TAP and Cortex-M3 TAP will be loaded with 'BYPASS' instruction.  
+
+When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the boundary scan instruction will be loaded into Boudary Scan TAP and Cortex-M3 TAP will be loaded with `BYPASS` instruction.  
 
 **2. Device ID for both TAP devices**  
 ![IDCODE for both TAPs](https://i.ibb.co/C0HnHKK/IDCODE.png)  
@@ -286,6 +287,9 @@ When doing boundary scan instruction such as 'SAMPLE/PRELOAD' and 'EXTEST', the 
 </div>   
 
 Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3 TAP is `0x3BA00477`.  
+
+**3. Value to write at boundary scan cell**  
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
