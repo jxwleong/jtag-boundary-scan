@@ -262,7 +262,8 @@ Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval`
 <div align="center">
   Figure 7.JTAG Architecture for STM32F103xx from [10.] pg 1084  
 </div>    
-There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be consider. 
+There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7., the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's id are different.  
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
