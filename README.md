@@ -14,8 +14,9 @@
         2. [Device IDCODE](#deviceID) 
         3. [Boundary Scan Cells and Registers Informations](#bscinfo)
 6.  [Result](#result)
-    1. [System Workbench for STM32](#stm32Workbench)
-    2. [Command-line interface (CLI)](#cli)
+    1. [Information required for JTAG Boundary Scan](#infoBoundaryScan)  
+    2. [System Workbench for STM32](#stm32Workbench)
+    3. [Command-line interface (CLI)](#cli)
 7.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
@@ -264,6 +265,14 @@ Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval`
 </div>    
 There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7., the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's id are different.  
 
+### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan  
+**1. Instruction opcode for different TAP devices** 
+
+|   | asdasd |   |   |   |
+|---|--------|---|---|---|
+|   |        |   |   |   |
+|   |        |   |   |   |
+|   |        |   |   |   |
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
@@ -279,3 +288,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 [8.] [BSDL Tutorial](https://www.corelis.com/education/tutorials/bsdl-tutorial/#What_is_BSDL)  
 [9.] [STM32F1_Low_Med_density_value_LQFP48.bsd](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cee300601299d2ce2c732fd/2e138503f7ce2022af8ae01e40947948/STM32F1_Low_Med_density_value_LQFP48.bsd)  
 [10.] [STM32F101xx, STM32F102xx, STM32F103xx, STM32F105xx and STM32F107xx advanced Arm®-based 32-bit MCUs - Reference manual](https://www.st.com/content/ccc/resource/technical/document/reference_manual/59/b9/ba/7f/11/af/43/d5/CD00171190.pdf/files/CD00171190.pdf/jcr:content/translations/en.CD00171190.pdf)  
+[11.] [ARM®
+ Debug Interface
+Architecture Specification
+ADIv5.0 to ADIv5.2](https://static.docs.arm.com/ihi0031/c/IHI0031C_debug_interface_as.pdf)
