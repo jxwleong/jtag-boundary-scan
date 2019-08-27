@@ -13,7 +13,10 @@
         1. [Insturction opcode and length](#instructNLength)  
         2. [Device IDCODE](#deviceID) 
         3. [Boundary Scan Cells and Registers Informations](#bscinfo)
-6.  [References](#refer)   
+6.  [Result](#result)
+    1. [System Workbench for STM32](#stm32Workbench)
+    2. [Command-line interface (CLI)](#cli)
+7.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
@@ -252,7 +255,11 @@ Based on Snippet 6. , for
 In this case, we want to sample the current input status of pin `PC13`. Note the `disval` of cell 215. To disable the output enable, cell 215 need to set to 1. By referring Gif 1. at [here](#samPre), when `CONTROL` register is set to HIGH (1), the tri-state output will be disable. Thus, the input data of pin PC13 can be captured.  
  
 **EXTEST**  
-Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval` description of control cell (215), to enable the tri-state output buffer, `CONTROL` register is set to LOW (0) so that the preloaded data at `Update Register` of `OUTPUT` can be drive to pin PC13. For more info on how `EXTEST` work, please click [here](#extest).
+Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval` description of control cell (215), to enable the tri-state output buffer, `CONTROL` register is set to LOW (0) so that the preloaded data at `Update Register` of `OUTPUT` can be drive to pin PC13. For more info on how `EXTEST` work, please click [here](#extest).  
+
+## <a name="result"></a> Result  
+### <a name="stm32Workbench"></a> System Workbench for STM32  
+### <a name="cli"></a> Command-line interface (CLI) 
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
