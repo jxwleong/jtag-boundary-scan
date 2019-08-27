@@ -290,6 +290,16 @@ Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3
 
 **3. Value to write at boundary scan cell**  
 
+| BoundaryScanCell/ JTAG Instruction 	| INPUT 	| OUTPUT 	| CONTROL 	|
+|------------------------------------	|-------	|--------	|---------	|
+| SAMPLE/PRELOAD                     	|  0/1  	|    x   	|    1    	|
+| EXTEST                             	|   x   	|   0/1  	|    0    	|  
+> For **SAMPLE/PRELOAD** instruction, INPUT cell (0/1) is set by user externally and CONTROL is preloaded.  
+> For **EXTEST** instruction, OUTPUT cell (0/1) and CONTROL was set by user by preloading the data using **SAMPLE/PRELOAD**.
+<div align="center">
+  Table 2. Data to be preloaded to boundary scan register respect with to instructions.
+</div>  
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
