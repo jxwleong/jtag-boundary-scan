@@ -32,7 +32,7 @@ JTAG is an industrial standard for testing and verifying PCB designs after fabri
   Figure 1. JTAG Register from [2.]  
 </div>  
     
-Based on Figure 1. , Any JTAG devices will have at least 4 I/O pin (TCK, TMS, TDI, TDO) with TRST as optional. For the purpose of this
+Based on Figure 1, Any JTAG devices will have at least 4 I/O pin (TCK, TMS, TDI, TDO) with TRST as optional. For the purpose of this
 project, only 4 I/O pins were used.  
   
 With so many data lines connected to the device, a controller unit is needed to tell the JTAG device what to do. That control unit is named
@@ -53,12 +53,12 @@ will be `SHIFT_DR` which will shift data from `TDI` to `TDO`.
 ## <a name="jtagInstruc"></a>  JTAG Instructions  
 ### <a name="bypass"></a> 1.BYPASS  
 By IEEE Standard 1149.1, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
-By referring to Figure 1. , after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how many bypass device(s). `bypass bits = n * 1`.
+By referring to Figure 1, after BYPASS instruction is loaded, `TDI` and `TDO` are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how many bypass device(s). `bypass bits = n * 1`.
 
 ### <a name="idcode"></a> 2. IDCODE
 JTAG IDCODE is a 32-bit device specific part number. Athouhg it's not a compulsory instruction specified by IEEE, but most JTAG device
 have this instruction. Most of the time, the IDCODE of JTAG device is used to get Boundary Scan Information from BSDL files.
-By referring to Figure 1. , after IDCODE instruction is loaded, `TDI` and `TDO` are connected with `Device ID Reg`. If there's only
+By referring to Figure 1, after IDCODE instruction is loaded, `TDI` and `TDO` are connected with `Device ID Reg`. If there's only
 one device, then shift a 32-bit data from `TDI` so that the 32-bit device ID can be shifted out from `Device ID Reg`. If there're more
 than one JTAG device, then the total number of bits to shift is `shift bits = n * 32`.
 
@@ -100,7 +100,7 @@ circuitry of the device. For example,
   Figure 4. Example of EXTEST from [2.]
 </div>    
 
-Based the circuitry on Figure 4. , EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips. To test the
+Based the circuitry on Figure 4, EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips. To test the
 Stuck-at fault defect at chip #1, a test pattern of `0bxxxx 1xxx` can be preloaded on chip #1 by using `SAMPLE/PRELOAD` instruction. Then, `EXTEST` instruction can be loaded in chip #1. For chip #2, sample the I/O pins by using `SAMPLE/PRELOAD` instruction. If the
 results of sampling shows `0bxxx1 xxxx`. Then, the pin is Stuck-at fault.  
   
@@ -123,7 +123,7 @@ further `EXTEST` is desired.
   Figure 5. Example of JTAG waveform from [6.] pg 25  
 </div>  
 
-When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By referring from Figure5. , when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
+When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By referring from Figure5, when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
 ```
 During the SHIFT_IR state, an instruction code is entered by shifting data
 on the TDI pin on the rising edge of TCK. The last bit of the opcode must
@@ -140,7 +140,7 @@ EXTEST, or BYPASS—that are described below.
   Snippet 2. Documentation from [6.] pg 25  
 </div>  
   
-Based on Snippet 2. , on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. 
+Based on Snippet 2, on the last bit of data shift, it must be on the next state which is `EXIT1_DR`. 
 > Note that the same principle apply to shifting of data and instruction.  
 
 ## <a name="bsdl"></a> Boundary Scan Description Language (BSDL) 
@@ -176,7 +176,7 @@ pads of the device are wired to external pins.
 <div align="center">
   Snippet 3. Boundary Scan Instruction code and length from [9.] line 149
 </div> 
-By referring the attributed on Snippet 3. , the instruction length of this device is 5-bit. The instruction opcode was also stated clearly which is:<br/>
+By referring the attributed on Snippet 3, the instruction length of this device is 5-bit. The instruction opcode was also stated clearly which is:<br/>
     
 * **BYPASS** : 5b11111  
 * **EXTEST** : 5b00000 
@@ -199,7 +199,7 @@ By referring the attributed on Snippet 3. , the instruction length of this devic
   Snippet 4. Device IDCODE from [9.] line 168
 </div>  
   
-Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary `0bXXXX 0110 0100 0010 0000 0000 0100 0001` and in hex form is `0xX6420041`.  
+Based on Snippet 4, the IDCODE for the Boundary Scan Device is in binary `0bXXXX 0110 0100 0010 0000 0000 0100 0001` and in hex form is `0xX6420041`.  
 
 ![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
 <div align="center">
@@ -208,7 +208,7 @@ Based on Snippet 4. , the IDCODE for the Boundary Scan Device is in binary `0bXX
   
   
   
-But by referring Figure 6. , the actual JTAG boundary scan device IDCODE is `0x16410041` which is `0b1 0110 0100 0001 0000 0000 0100 0001` in binary.  
+But by referring Figure 6, the actual JTAG boundary scan device IDCODE is `0x16410041` which is `0b1 0110 0100 0001 0000 0000 0100 0001` in binary.  
   
 #### <a name=bscinfo></a> Boundary Scan Cells and Registers Informations  
 ```vhdl
@@ -220,7 +220,7 @@ But by referring Figure 6. , the actual JTAG boundary scan device IDCODE is `0x1
   Snippet 5. Device IDCODE from [9.] line 185
 </div>  
   
-Based on Snippet 5. , the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
+Based on Snippet 5, the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
    
 ```vhdl
 -- The following list specifies the characteristics of each cell in the boundary scan register from 
@@ -251,7 +251,7 @@ Based on Snippet 5. , the length of boundary scan register is 232. This means th
   Snippet 6. Boundary Scan Cell Sturture from [9.] line 189
 </div>  
   
-Based on Snippet 6. , for  
+Based on Snippet 6, for  
 **SAMPLE/PRELOAD**  
 In this case, we want to sample the current input status of pin `PC13`. Note the `disval` of cell 215. To disable the output enable, cell 215 need to set to 1. By referring Gif 1. at [here](#samPre), when `CONTROL` register is set to HIGH (1), the tri-state output will be disable. Thus, the input data of pin PC13 can be captured.  
  
@@ -261,9 +261,9 @@ Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval`
 ## <a name="result"></a> Result  
 ![JTAG Architecture for STM32F103xx](https://trello-attachments.s3.amazonaws.com/5d0ad54197302875cae43986/577x380/bb87a975c30916ed276583988f1eab23/JTAG_Architecture.jpg)   
 <div align="center">
-  Figure 7.JTAG Architecture for STM32F103xx from [10.] pg 1084  
+  Figure 7. JTAG Architecture for STM32F103xx from [10.] pg 1084  
 </div>    
-There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7., the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's id are different.  
+There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7, the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's ID are different.  
 
 ### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
 
@@ -277,7 +277,15 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 <div align="center">
   Table 1. The JTAG instructions opcode for two TAP devices in STM32F103C8T6 from [9.] line 149 and [11.] pg75-76
 </div>  
+When doing boundary scan instruction such as 'SAMPLE/PRELOAD' and 'EXTEST', the boundary scan instruction will be loaded into Boudary Scan TAP and Cortex-M3 TAP will be loaded with 'BYPASS' instruction.  
 
+**2. Device ID for both TAP devices**  
+![IDCODE for both TAPs](https://i.ibb.co/C0HnHKK/IDCODE.png)  
+<div align="center">
+  Figure 8. IDCODE for two TAP devices in STM32F103C8T6 from [10.] pg1086
+</div>   
+
+Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3 TAP is `0x3BA00477`.  
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
