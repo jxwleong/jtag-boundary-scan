@@ -265,14 +265,13 @@ Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval`
 </div>    
 There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7., the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's id are different.  
 
-### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan  
-**1. Instruction opcode for different TAP devices** 
+### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
 
-|   | asdasd |   |   |   |
-|---|--------|---|---|---|
-|   |        |   |   |   |
-|   |        |   |   |   |
-|   |        |   |   |   |
+**1. Instruction opcode for different TAP devices** 
+| Instruction(binary)/ TAP devices 	| IDCODE 	| BYPASS 	| SAMPLE/PERLOAD 	| EXTEST 	|
+|----------------------------------	|:------:	|--------	|----------------	|--------	|
+| Boundary Scan TAP                	|  00001 	|  11111 	|      00010     	|  00000 	|
+| Cortex-M3 TAP                    	|  1110  	|  1111  	|    0001/0010   	|  0000  	|
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 ### <a name="cli"></a> Command-line interface (CLI) 
 
