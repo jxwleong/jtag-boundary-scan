@@ -275,7 +275,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 
 ### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
 
-**1. Instruction opcode for different TAP devices**  
+####1. Instruction opcode for different TAP devices  
 
 | Instruction(binary)/ TAP devices 	| IDCODE 	| BYPASS 	| SAMPLE/PERLOAD 	| EXTEST 	|
 |----------------------------------	|:------:	|--------	|----------------	|--------	|
@@ -288,7 +288,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 
 When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the boundary scan instruction will be loaded into Boudary Scan TAP and Cortex-M3 TAP will be loaded with `BYPASS` instruction.  
 
-**2. Device ID for both TAP devices**  
+####2. Device ID for both TAP devices  
 ![IDCODE for both TAPs](https://i.ibb.co/C0HnHKK/IDCODE.png)  
 <div align="center">
   Figure 8. IDCODE for two TAP devices in STM32F103C8T6 from [10.] pg1086
@@ -296,7 +296,7 @@ When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the 
 
 Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3 TAP is `0x3BA00477`.  
 
-**3. Value to write at boundary scan cell**  
+####3. Value to write at boundary scan cell  
 
 | BoundaryScanCell/ JTAG Instruction 	| INPUT 	| OUTPUT 	| CONTROL 	|
 |------------------------------------	|-------	|--------	|---------	|
@@ -310,23 +310,24 @@ Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3
 
 By referring to [Boundary Scan Cells and Registers Informations](#bscinfo), we know that the length of boundary scan cell is `232` which mean that we need to shift in 232 bits via TDI. Basically, a I/O is connected to three boundary scan cells (INPUT, OUTPUT and CONTROL). Depend on which instruction used, the datat shift in for boundary scan cells are different.  
 
-*1. SAMPLE/PRELOAD*  
+**1. SAMPLE/PRELOAD**
 To sample the INPUT boundary scan cell state (0/1). The CONTROL cell are set to 1 to disable the output enable. At the same time, the data wanted to be preload for EXTEST can shift in at the same time.  
 
-*2. EXTEST*  
-To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 to enable the output enable. Then, the desired OUTPUT state (0/1) preloaded can be drive to the I/O pin.  
+**2. EXTEST**
+To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 to enable the output enable. Then, the desired OUTPUT state (0/1) preloaded can be drive to the I/O pin. 
+> The first bit shifted out from TDO will be the LSB of result. The shifting of all JTAG operations is from LSB to MSB.  
 
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
-### <a name="wbIDCODE"></a> **1. IDCODE**  
-### <a name="wbBYPASS"></a> **2. BYPASS**  
-### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
-### <a name="wbEXTEST"></a> **4. EXTEST**  
+#### <a name="wbIDCODE"></a> **1. IDCODE**  
+#### <a name="wbBYPASS"></a> **2. BYPASS**  
+#### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+#### <a name="wbEXTEST"></a> **4. EXTEST**  
 
 ### <a name="cli"></a> Command-line interface (CLI) 
-### <a name="cliIDCODE"></a> **1. IDCODE**  
-### <a name="cliBYPASS"></a> **2. BYPASS**  
-### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
-### <a name="cliEXTEST"></a> **4. EXTEST**   
+#### <a name="cliIDCODE"></a> **1. IDCODE**  
+#### <a name="cliBYPASS"></a> **2. BYPASS**  
+#### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+#### <a name="cliEXTEST"></a> **4. EXTEST**   
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
