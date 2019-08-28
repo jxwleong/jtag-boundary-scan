@@ -362,12 +362,12 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE 3V3](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/856x152/e98a87661df4ec1e0f0da1d3aeffb6a8/SAMPLE_RESULT_1.png)  
 <div align="center">
-  Figure 13. Sample I/O connected to 3V3
+  Figure 13. Sample I/O pin connected to 3V3
 </div> 
 
 ![Result of SAMPLE GND](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/841x150/9151bf5225d980a263544f96a4526026/SAMPLE_RESULT_0.png)  
 <div align="center">
-  Figure 14. Sample I/O connected to GND
+  Figure 14. Sample I/O pin connected to GND
 </div> 
 
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
