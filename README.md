@@ -401,12 +401,12 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
   Figure 16. Bypass both TAP devices using CLI
 </div> 
 
-![Result of IDCODE Boundary Scan TAP and BYPASS Cortex-M3 TAP](https://i.ibb.co/J7QBnfX/cli-bypass-cortex-get-bs-id.png)
+<img src="https://i.ibb.co/J7QBnfX/cli-bypass-cortex-get-bs-id.png" width="800"> 
 <div align="center">
   Figure 17. Bypass Cortex-M3 TAP and IDCODE Boundary Scan TAP using CLI
 </div> 
 
-![Result of IDCODE Cortex-M3 TAP and BYPASS Boundary Scan TAP](https://i.ibb.co/KL5S4ZJ/cli-bypass-bs-get-cortex-id.png)
+<img src="https://i.ibb.co/KL5S4ZJ/cli-bypass-bs-get-cortex-id.png" width="800"> 
 <div align="center">
   Figure 18. Bypass Boundary Scan TAP and IDCODE Cortex-M3 TAP using CLI
 </div> 
