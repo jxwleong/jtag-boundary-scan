@@ -344,16 +344,46 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 <div align="center">
   Figure 11. Bypass two TAP devices using BYPASS instruction
 </div> 
+
 The result shown at Figure 11 was get by shift in `0b11110011` with shifting length of 10. The working of this bypass is shown at Gif 3.  
 
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+![Result of SAMPLE 3V3](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/856x152/e98a87661df4ec1e0f0da1d3aeffb6a8/SAMPLE_RESULT_1.png)  
+<div align="center">
+  Figure 12. Sample I/O connected to 3V3
+</div> 
+
+![Result of SAMPLE GND](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/841x150/9151bf5225d980a263544f96a4526026/SAMPLE_RESULT_0.png)  
+<div align="center">
+  Figure 13. Sample I/O connected to GND
+</div> 
+
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
 
 ### <a name="cli"></a> Command-line interface (CLI) 
 #### <a name="cliIDCODE"></a> **1. IDCODE**  
+![Result of IDCODE CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/783x185/877c0c8cd5fb3f3a5245ff73d510c95e/JTAG_IDCODE.png)  
+<div align="center">
+  Figure 14. Get IDCODE of both TAP devices using CLI
+</div> 
+
 #### <a name="cliBYPASS"></a> **2. BYPASS**  
+![Result of BYPASS CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/274x62/ffeb7739552e41a7e02e77b7f6471422/JTAG_BYPASS.png)  
+<div align="center">
+  Figure 15. Bypass both TAP devices using CLI
+</div> 
+
 #### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+![Result of SAMPLE/PRELOAD CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/570x132/60c7800e7a7b147ed61de94b7067809a/JTAG_SAMPLE.png)  
+<div align="center">
+  Figure 16. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+</div> 
+
 #### <a name="cliEXTEST"></a> **4. EXTEST**   
+![Result of EXTEST CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/227x85/eb2b5a6ef1d40dac2b03b6a08939ce9d/JTAG_EXTEST.png)  
+<div align="center">
+  Figure 17. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+</div> 
 
 ## <a name="refer"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
