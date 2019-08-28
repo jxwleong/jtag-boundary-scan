@@ -105,7 +105,7 @@ This instruction is also a compulsory instruction by IEEE Standard 1149.1. This 
 circuitry of the device. For example,
 ![alt text](https://i.ibb.co/hKqxy4k/Capture.png "Connection between chips")
 <div align="center">
-  Figure 4. Example of EXTEST from [2.]
+  Figure 3. Example of EXTEST from [2.]
 </div>    
 
 Based the circuitry on Figure 4, EXTEST instruction can test Stuck-at fault and short circuit between pins/ chips. To test the
@@ -128,7 +128,7 @@ further `EXTEST` is desired.
 ## <a name="ioSig"></a> JTAG I/O signals
 ![Example of JTAG waveform](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d01a23eae083935945dcb4a/af60b1f0e726cff13dfc213a915b40b6/jtagWave.png)
 <div align="center">
-  Figure 5. Example of JTAG waveform from [6.] pg 25  
+  Figure 4. Example of JTAG waveform from [6.] pg 25  
 </div>  
 
 When the TAP controller enter `SHIFT_IR` or `SHIFT_DR` state, the first `TCK` clock cycle does not shift the data from `TDI`. Instead, at the second `TCK` clock cycle, `TDI` and `TDO` is shifted. By referring from Figure5, when current state is `CAPTURE_DR` then apply `TMS` of 1 and a pulse of `TCK` to transition to `SHIFT_DR` state. Then, at the second `TCK` cycle of `SHIFT_DR` the first bits of `TDI` and `TDO` is write and read.
@@ -211,7 +211,7 @@ Based on Snippet 4, the IDCODE for the Boundary Scan Device is in binary `0bXXXX
 
 ![Boundary Scan IDCODE](https://i.ibb.co/VvTfm76/JTAGIDcode.png)
 <div align="center">
-  Figure 6. Booundary Scan IDCODE from [10.] pg 1086
+  Figure 5. Booundary Scan IDCODE from [10.] pg 1086
 </div>   
   
   
@@ -269,7 +269,7 @@ Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval`
 ## <a name="result"></a> Result  
 ![JTAG Architecture for STM32F103xx](https://trello-attachments.s3.amazonaws.com/5d0ad54197302875cae43986/577x380/bb87a975c30916ed276583988f1eab23/JTAG_Architecture.jpg)   
 <div align="center">
-  Figure 7. JTAG Architecture for STM32F103xx from [10.] pg 1084  
+  Figure 6. JTAG Architecture for STM32F103xx from [10.] pg 1084  
 </div>    
 There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTAG instructions, both devices must be considered. Based on Figure7, the instruction length of Boundary scan TAP (5-bits) and Cortex-M3 TAP are different. Not only the instruction length of both devices are different but also the instruction opcode as well as the device's ID are different.  
 
@@ -291,7 +291,7 @@ When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the 
 #### 2. Device ID for both TAP devices  
 ![IDCODE for both TAPs](https://i.ibb.co/C0HnHKK/IDCODE.png)  
 <div align="center">
-  Figure 8. IDCODE for two TAP devices in STM32F103C8T6 from [10.] pg1086
+  Figure 7. IDCODE for two TAP devices in STM32F103C8T6 from [10.] pg1086
 </div>   
 
 Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3 TAP is `0x3BA00477`.  
@@ -323,13 +323,13 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 **1. Get both devices IDCODE after resetting the TAP state machine to TEST_LOGIC_RESET**  
 ![Devices ID after resetting TAP state machine](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/dca5c53327909a598174ae2069b09380/IDCODE-both.png)  
 <div align="center">
-  Figure 9. IDCODE for two TAP devices after reset TAP
+  Figure 8. IDCODE for two TAP devices after reset TAP
 </div>   
 
 **2. Get Devices IDCODE by using IDCODE instruction**  
 ![Devices ID using IDCODE instruction](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/dca5c53327909a598174ae2069b09380/IDCODE-both.png)  
 <div align="center">
-  Figure 10. IDCODE for two TAP devices using IDCODE instruction
+  Figure 9. IDCODE for two TAP devices using IDCODE instruction
 </div>   
 
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
@@ -343,31 +343,31 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 
 ![Result of BYPASS both TAP devices](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cefa60937c6a41272b06fe9/c3d4fb2514e62f5bc005d235655ee6c3/jtag-Bypass-Result.png)  
 <div align="center">
-  Figure 11. Bypass two TAP devices using BYPASS instruction
+  Figure 10. Bypass two TAP devices using BYPASS instruction
 </div> 
 
 The result shown at Figure 11 was get by shift in `0b11110011` with shifting length of 10. The working of this bypass is shown at Gif 3.  
 ![Result of BYPASS Cortex-M3 TAP and use IDCODE for Boundary Scan TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/d727edacf41ae925e56bf032542b24af/IDCODE-read-Bs-TAPBypass-Cortex-M3.png)  
 <div align="center">
-  Figure 12. Bypass Cortex-M3 TAP and load IDCODE Boundary Scan TAP
+  Figure 11. Bypass Cortex-M3 TAP and load IDCODE Boundary Scan TAP
 </div> 
 
 > Based on JTAG TAP devices connection on Figure 7, the LSB of the data shifted out from TDO is the bypass bit of Cortex-M3 TAP. In order to get the correct IDCODE for Boundary Scan TAP, the data need to be shifted to the right by one bit.  
 
 ![Result of BYPASS Boundary Scan TAP and use IDCODE for Cortex-M3 TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/951a60e0fb9a94c2f88c1d62b6d08b97/IDCODE-Bypass-Bs-TAPRead-Cortex-M3.png)  
 <div align="center">
-  Figure 13. Bypass Boundary Scan TAP and load IDCODE Cortex-M3 TAP
+  Figure 12. Bypass Boundary Scan TAP and load IDCODE Cortex-M3 TAP
 </div> 
 
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE 3V3](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/856x152/e98a87661df4ec1e0f0da1d3aeffb6a8/SAMPLE_RESULT_1.png)  
 <div align="center">
-  Figure 14. Sample I/O connected to 3V3
+  Figure 13. Sample I/O connected to 3V3
 </div> 
 
 ![Result of SAMPLE GND](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/841x150/9151bf5225d980a263544f96a4526026/SAMPLE_RESULT_0.png)  
 <div align="center">
-  Figure 15. Sample I/O connected to GND
+  Figure 14. Sample I/O connected to GND
 </div> 
 
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
@@ -376,25 +376,25 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 #### <a name="cliIDCODE"></a> **1. IDCODE**  
 ![Result of IDCODE CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/783x185/877c0c8cd5fb3f3a5245ff73d510c95e/JTAG_IDCODE.png)  
 <div align="center">
-  Figure 16. Get IDCODE of both TAP devices using CLI
+  Figure 15. Get IDCODE of both TAP devices using CLI
 </div> 
 
 #### <a name="cliBYPASS"></a> **2. BYPASS**  
 ![Result of BYPASS CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/274x62/ffeb7739552e41a7e02e77b7f6471422/JTAG_BYPASS.png)  
 <div align="center">
-  Figure 17. Bypass both TAP devices using CLI
+  Figure 16. Bypass both TAP devices using CLI
 </div> 
 
 #### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE/PRELOAD CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/570x132/60c7800e7a7b147ed61de94b7067809a/JTAG_SAMPLE.png)  
 <div align="center">
-  Figure 18. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 17. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 #### <a name="cliEXTEST"></a> **4. EXTEST**   
 ![Result of EXTEST CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/227x85/eb2b5a6ef1d40dac2b03b6a08939ce9d/JTAG_EXTEST.png)  
 <div align="center">
-  Figure 19. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 18. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 ## <a name="refer"></a> References
