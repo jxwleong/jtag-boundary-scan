@@ -334,11 +334,17 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
 **1. Bypass both TAP devices**  
-![Result of BYPASS both TAP devices](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cefa60937c6a41272b06fe9/c3d4fb2514e62f5bc005d235655ee6c3/jtag-Bypass-Result.png)
 ![Example of BYPASS instructions](https://i.ibb.co/BsVg2Qd/ezgif-com-gif-maker.gif)  
 <div align="center">
   Gif 3. Example of BYPASS instruction
 </div>   
+> First bit of data shifted out from TDO is LSB and the last bit shifted out is MSB.  
+
+![Result of BYPASS both TAP devices](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cefa60937c6a41272b06fe9/c3d4fb2514e62f5bc005d235655ee6c3/jtag-Bypass-Result.png)  
+<div align="center">
+  Figure 11. Bypass two TAP devices using BYPASS instruction
+</div> 
+The result shown at Figure 11 was get by shift in `0b11110011` with shifting length of 10. The working of this bypass is shown at Gif 3.  
 
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
