@@ -318,7 +318,20 @@ To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 
 > The first bit shifted out from TDO will be the LSB of result. The shifting of all JTAG operations is from LSB to MSB.  
 
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
-#### <a name="wbIDCODE"></a> **1. IDCODE**  
+#### <a name="wbIDCODE"></a> **1. IDCODE** 
+**1. Get both devices IDCODE after resetting the TAP state machine to TEST_LOGIC_RESET**  
+![Devices ID after resetting TAP state machine](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/dca5c53327909a598174ae2069b09380/IDCODE-both.png)  
+<div align="center">
+  Figure 9. IDCODE for two TAP devices after reset TAP
+</div>   
+
+**2. Get Devices IDCODE by using IDCODE instruction**  
+![Devices ID using IDCODE instruction](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/dca5c53327909a598174ae2069b09380/IDCODE-both.png)  
+<div align="center">
+  Figure 10. IDCODE for two TAP devices using IDCODE instruction
+</div>   
+
+
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
