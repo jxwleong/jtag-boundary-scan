@@ -1,20 +1,20 @@
-## Summary
+## Contents
 1.  [What is this repo about?](#repoIntro)
 2.  [Requirements for this repo](#repoReq)
-2.  [What is JTAG?](#jtagIntro)
-3.  [JTAG Instuctions](#jtagInstruc)
+3.  [What is JTAG?](#jtagIntro)
+4.  [JTAG Instuctions](#jtagInstruc)
     1. [BYPASS](#bypass)
     2. [IDCODE](#idcode)
     3. [SAMPLE/PRELOAD](#samPre)
     4. [EXTEST](#extest)
-4.  [JTAG I/O signals](#ioSig) 
-5.  [Boundary Scan Description Language(BSDL)](#bsdl)
+5.  [JTAG I/O signals](#ioSig) 
+6.  [Boundary Scan Description Language(BSDL)](#bsdl)
     1. [What is BSDL?](#bsdlIntro)
     2. [How to read BSDL?](#bsdlHowTo)
         1. [Insturction opcode and length](#instructNLength)  
         2. [Device IDCODE](#deviceID) 
         3. [Boundary Scan Cells and Registers Informations](#bscinfo)
-6.  [Result](#result)
+7.  [Result](#result)
     1. [Information required for JTAG Boundary Scan](#infoBoundaryScan)  
     2. [Result for System Workbench for STM32](#stm32Workbench)
         1. [IDCODE](#wbIDCODE)
@@ -26,7 +26,7 @@
         2. [BYPASS](#cliBYPASS)
         3. [SAMPLE/PRELOAD](#cliSAMPLE_PRELOAD)
         4. [EXTEST](#cliEXTEST)
-7.  [References](#refer)   
+8.  [References](#refer)   
 
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
