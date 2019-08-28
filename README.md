@@ -275,7 +275,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 
 ### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
 
-####1. Instruction opcode for different TAP devices  
+#### 1. Instruction opcode for different TAP devices  
 
 | Instruction(binary)/ TAP devices 	| IDCODE 	| BYPASS 	| SAMPLE/PERLOAD 	| EXTEST 	|
 |----------------------------------	|:------:	|--------	|----------------	|--------	|
@@ -288,7 +288,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 7. When doing JTA
 
 When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the boundary scan instruction will be loaded into Boudary Scan TAP and Cortex-M3 TAP will be loaded with `BYPASS` instruction.  
 
-####2. Device ID for both TAP devices  
+#### 2. Device ID for both TAP devices  
 ![IDCODE for both TAPs](https://i.ibb.co/C0HnHKK/IDCODE.png)  
 <div align="center">
   Figure 8. IDCODE for two TAP devices in STM32F103C8T6 from [10.] pg1086
@@ -296,7 +296,7 @@ When doing boundary scan instruction such as `SAMPLE/PRELOAD` and `EXTEST`, the 
 
 Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3 TAP is `0x3BA00477`.  
 
-####3. Value to write at boundary scan cell  
+#### 3. Value to write at boundary scan cell  
 
 | BoundaryScanCell/ JTAG Instruction 	| INPUT 	| OUTPUT 	| CONTROL 	|
 |------------------------------------	|-------	|--------	|---------	|
@@ -319,6 +319,7 @@ To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 
 
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 #### <a name="wbIDCODE"></a> **1. IDCODE** 
+By referring Figure 7 and Figure 8, the expected result for both devices is `0x164100413ba00477`.  
 **1. Get both devices IDCODE after resetting the TAP state machine to TEST_LOGIC_RESET**  
 ![Devices ID after resetting TAP state machine](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/dca5c53327909a598174ae2069b09380/IDCODE-both.png)  
 <div align="center">
@@ -330,6 +331,8 @@ To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 
 <div align="center">
   Figure 10. IDCODE for two TAP devices using IDCODE instruction
 </div>   
+
+
 
 
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
