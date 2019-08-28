@@ -346,6 +346,16 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 </div> 
 
 The result shown at Figure 11 was get by shift in `0b11110011` with shifting length of 10. The working of this bypass is shown at Gif 3.  
+![Result of BYPASS Cortex-M3 TAP and use IDCODE for Boundary Scan TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/d727edacf41ae925e56bf032542b24af/IDCODE-read-Bs-TAPBypass-Cortex-M3.png)  
+<div align="center">
+  Figure 11. Bypass Cortex-M3 TAP and load IDCODE Boundary Scan TAP
+</div> 
+> Based on JTAG TAP devices connection on Figure 7, the LSB of the data shifted out from TDO is the bypass bit of Cortex-M3 TAP. In order to get the correct IDCODE for Boundary Scan TAP, the data need to be shifted to the right by one bit.  
+
+![Result of BYPASS Boundary Scan TAP and use IDCODE for Cortex-M3 TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/951a60e0fb9a94c2f88c1d62b6d08b97/IDCODE-Bypass-Bs-TAPRead-Cortex-M3.png)  
+<div align="center">
+  Figure 11. Bypass Boundary Scan TAP and load IDCODE Cortex-M3 TAP
+</div> 
 
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE 3V3](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/856x152/e98a87661df4ec1e0f0da1d3aeffb6a8/SAMPLE_RESULT_1.png)  
