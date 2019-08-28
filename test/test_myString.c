@@ -35,7 +35,7 @@ void test_bypassCharactersInStr_given_10_blank_spaces_adaZZZ111_bypass_22_charac
   char *str = "          adaZZZ111";
   bypassCharactersInStr(&str, 22);
   TEST_ASSERT_EQUAL_STRING("Z111", str);
-}*/
+}
 
 void test_getNumberTypeInStr_given_0xface_expect_HEXADECIMAL(void){
   char *str = "0xface";
@@ -56,11 +56,11 @@ void test_getNumberTypeInStr_given_abcd_expect_INVALID(void){
   char *str = "cvcvcv";
   TEST_ASSERT_EQUAL(INVALID, getNumberTypeInStr(&str));
 }
-/*
+
 void test_decimalToBinaryInStr_given_87_expect_01010111(void){
   TEST_ASSERT_EQUAL_STRING("01010111", decimalToBinaryInStr(87, 8));
-}
-
+}*/
+/*
 // 0b10101111(str) = 175(decimal)
 void test_getNumberFromStr_given_0b10101111_expect_175(void){
   char *str = "0b10101111";
@@ -76,9 +76,10 @@ void test_getNumberFromStr_given_0xffff_expect_65535(void){
 void test_getNumberFromStr_given_123456789_expect_123456789(void){
   char *str = "123456789";
   TEST_ASSERT_EQUAL(123456789, getNumberFromStr(&str));
-}
+}*/
+
 
 void test_getDataLengthFromStr_given_10_expect_10(void){
   char *str = "  10";
   TEST_ASSERT_EQUAL(10, getDataLengthFromStr(&str));
-}*/
+}

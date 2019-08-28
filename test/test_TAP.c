@@ -157,7 +157,7 @@ void verifyTapSequence(TapSequence tapSeq[]){
   state, TAP state machine only travel at rising edge so
   TMS must be set before the rising edge*/
 
-
+/*
 void test_resetTapState_given_extra_seq_on_entry_5_expect_error_msg(void){
 
 
@@ -263,7 +263,7 @@ void test_resetTapState_given_correct_seq_start_from_CAPTURE_DR_expect_TAP_LOGIC
 }
 
 
-
+*/
 void test_getTapStateName_given_X_expect_Invalid_TAP_state_string(void)
 {
   TapState tapstate;
@@ -273,7 +273,7 @@ void test_getTapStateName_given_X_expect_Invalid_TAP_state_string(void)
   TEST_ASSERT_EQUAL_STRING("Invalid TAP state", tapStateName);
 
 }
-
+/*
 void test_getTmsRequired_given_TEST_LOGIC_RESET_to_RUN_TEST_IDLE_expect_tms_LOW(void){
   int expectedTms;
 

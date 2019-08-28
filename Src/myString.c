@@ -6,6 +6,7 @@
  */
 
 #include <malloc.h>
+#include <stdint.h>
 #include "myString.h"
 
 void skipWhiteSpaces(char **str){
@@ -41,17 +42,14 @@ else if(**str == 'x' || **str == 'X'){
     ++*str; // remove the character 'b'
     return HEXADECIMAL;
   }
-else if(isdigit(**str)){
+else{
     --*str; // move the pointer to start
     return DECIMAL;
   }
-else{
-  printf("Invalid number is received");
-  return INVALID;
-  }
+
 }
 
-char *decimalToBinaryInStr(int data, int length){
+char *decimalToBinaryInStr(uint64_t data, int length){
 int i = 0;
 int updateData = 0;
 int count = 0;

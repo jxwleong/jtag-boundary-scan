@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 #include "USART.h"
 #include "common.h"
 #include "global.h"
@@ -136,7 +137,12 @@ void commandLineOperation(char *commandStr){
 							 \nEXTEST	\
 							 \n------	\
 				             \n1. Type 'jtag extest [Boundary Scan Register/ GPIO pin] [pin status (1/0)]'	\
-				             \n2. Connect the GPIO pin to an simple LED circuit then observe the output\n\n");
+				             \n2. Connect the GPIO pin to an simple LED circuit then observe the output  \
+				             \n	\
+				             \nLoading instruction register or data register		\
+				             \n---------------------------------------------	\
+				             \n1. jtag load [IR/DR] [data] [length]	\
+							 \n2. The result will be shown after loading DR\n\n");
 	}
 	else{
 		sprintf(tempBuffer, "\nUnknown command received. Please type 'help' for assitance. \

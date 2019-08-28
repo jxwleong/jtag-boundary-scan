@@ -19,7 +19,7 @@ void skipWhiteSpaces(char **str);
 void bypassCharactersInStr(char **str, int length);
 
 NumberTypeBase getNumberTypeInStr(char **str);
-char *decimalToBinaryInStr(int data, int length);
+char *decimalToBinaryInStr(uint64_t data, int length);
 
 long long getNumberFromStr(char **str);
 int getDataLengthFromStr(char **str);
