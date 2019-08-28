@@ -310,10 +310,10 @@ Based on Figure8, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M3
 
 By referring to [Boundary Scan Cells and Registers Informations](#bscinfo), we know that the length of boundary scan cell is `232` which mean that we need to shift in 232 bits via TDI. Basically, a I/O is connected to three boundary scan cells (INPUT, OUTPUT and CONTROL). Depend on which instruction used, the datat shift in for boundary scan cells are different.  
 
-**1. SAMPLE/PRELOAD**
+*1. SAMPLE/PRELOAD*
 To sample the INPUT boundary scan cell state (0/1). The CONTROL cell are set to 1 to disable the output enable. At the same time, the data wanted to be preload for EXTEST can shift in at the same time.  
 
-**2. EXTEST**
+*2. EXTEST*
 To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 to enable the output enable. Then, the desired OUTPUT state (0/1) preloaded can be drive to the I/O pin. 
 > The first bit shifted out from TDO will be the LSB of result. The shifting of all JTAG operations is from LSB to MSB.  
 
@@ -377,6 +377,16 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 </div> 
 
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
+![Result of EXTEST PA9 to 1](https://i.ibb.co/9r4rtSJ/IMG-20190828-155003.jpg)  
+<div align="center">
+  Figure 14. EXTEST set the I/O pin PA9 to 1 (HIGH)
+</div> 
+
+![Result of EXTEST PA9 to 0](https://i.ibb.co/TrzP2VD/IMG-20190828-155028.jpg)  
+<div align="center">
+  Figure 14. EXTEST set the I/O pin PA9 to 0 (LOW)
+</div> 
+
 
 ### <a name="cli"></a> Command-line interface (CLI) 
 #### <a name="cliIDCODE"></a> **1. IDCODE**  
