@@ -385,16 +385,26 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
   Figure 16. Bypass both TAP devices using CLI
 </div> 
 
+![Result of IDCODE Cortex-M3 TAP and BYPASS Boundary Scan TAP](https://i.ibb.co/KL5S4ZJ/cli-bypass-bs-get-cortex-id.png)
+<div align="center">
+  Figure 17. Bypass Boundary Scan TAP and IDCODE Cortex-M3 TAP using CLI
+</div> 
+
+![Result of IDCODE Boundary Scan TAP and BYPASS Cortex-M3 TAP](https://i.ibb.co/J7QBnfX/cli-bypass-cortex-get-bs-id.png)
+<div align="center">
+  Figure 18. Bypass Cortex-M3 TAP and IDCODE Boundary Scan TAP using CLI
+</div> 
+
 #### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE/PRELOAD CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/570x132/60c7800e7a7b147ed61de94b7067809a/JTAG_SAMPLE.png)  
 <div align="center">
-  Figure 17. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 19. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 #### <a name="cliEXTEST"></a> **4. EXTEST**   
 ![Result of EXTEST CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/227x85/eb2b5a6ef1d40dac2b03b6a08939ce9d/JTAG_EXTEST.png)  
 <div align="center">
-  Figure 18. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 20 . Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 ## <a name="refer"></a> References
