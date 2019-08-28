@@ -1,5 +1,6 @@
 ## Summary
 1.  [What is this repo about?](#repoIntro)
+2.  [Requirements for this repo](#repoReq)
 2.  [What is JTAG?](#jtagIntro)
 3.  [JTAG Instuctions](#jtagInstruc)
     1. [BYPASS](#bypass)
@@ -29,7 +30,20 @@
 
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
-IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.
+IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.  
+
+## <a name="repoReq"></a> Requirements for this repo  
+**Hardware**
+1. STM32F103 Blue Pill/ Black Pill x 1
+2. SMT32 Smart V2.0 x 2
+3. USB to TTL converter x 1  
+4. LED(s)
+5. 100 Ω resistor x 3
+
+**Software**
+1. Tera Term  
+2. System Workbench for STM32
+
 
 ## <a name="jtagIntro"></a> What is JTAG?
 JTAG is an industrial standard for testing and verifying PCB designs after fabricate (Boundary Scan). Besides that, JTAG is often used as an debugger for hardware such as microcontroller like STM32F103C8T6.
