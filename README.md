@@ -323,6 +323,8 @@ To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 
   Figure 8. Schematic for JTAG Boundary Scan
 </div>  
 
+> PA9 for EXTEST can be replaced by any I/O pin
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 #### <a name="wbIDCODE"></a> **1. IDCODE** 
 By referring Figure 7 and Figure 8, the expected result for both devices is `0x164100413ba00477`.  
