@@ -377,7 +377,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 </div> 
 
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
-![Result of EXTEST PA9 to 1](https://i.ibb.co/9r4rtSJ/IMG-20190828-155003.jpg)  
+<img src="https://i.ibb.co/9r4rtSJ/IMG-20190828-155003.jpg" width="640">  
 <div align="center">
   Figure 14. EXTEST set the I/O pin PA9 to 1 (HIGH)
 </div> 
