@@ -31,5 +31,5 @@ typedef enum{
 
 
 BSReg getBSRegFromTable(char *str);
-
+int isBSRegValid(char *str);
 #endif /* BSREG_TABLE_H_ */
