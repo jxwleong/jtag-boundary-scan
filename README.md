@@ -95,7 +95,7 @@ Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/
   Gif 1. Boundary Scan Register from [6.] pg 9 
 </div>  
 
-By default (no shifting), the input pin (PIN_IN) data will be connect to `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
+By default (no shifting), the input pin (PIN_IN), output pin (PIN_OUT) and control pin (PIN_OE) signals are connect to their own multiplexer before `Capture Registers`. After the instruction is loaded then go to `CAPTURE_DR` state, the `PIN_IN` input pin, `OEJ` control pin and `OUTJ` output pin data will be capture by the `Capture Registers` .
 After capturing the data (SAMPLE), then proceed to `SHIFT_DR`. At this state, the data wanted to be preload into `OEJ` and `OUTJ`
 pin can be shifted in from TDI. After shifting the correct test pattern, then go to `UPDATE_DR` state to update the data to 
 `Update Registers`. The preloaded data is now ready for `EXTEST` instruction.
