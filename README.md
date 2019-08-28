@@ -349,25 +349,25 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 The result shown at Figure 11 was get by shift in `0b11110011` with shifting length of 10. The working of this bypass is shown at Gif 3.  
 ![Result of BYPASS Cortex-M3 TAP and use IDCODE for Boundary Scan TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/d727edacf41ae925e56bf032542b24af/IDCODE-read-Bs-TAPBypass-Cortex-M3.png)  
 <div align="center">
-  Figure 11. Bypass Cortex-M3 TAP and load IDCODE Boundary Scan TAP
+  Figure 12. Bypass Cortex-M3 TAP and load IDCODE Boundary Scan TAP
 </div> 
 
 > Based on JTAG TAP devices connection on Figure 7, the LSB of the data shifted out from TDO is the bypass bit of Cortex-M3 TAP. In order to get the correct IDCODE for Boundary Scan TAP, the data need to be shifted to the right by one bit.  
 
 ![Result of BYPASS Boundary Scan TAP and use IDCODE for Cortex-M3 TAP](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d0ad54197302875cae43986/951a60e0fb9a94c2f88c1d62b6d08b97/IDCODE-Bypass-Bs-TAPRead-Cortex-M3.png)  
 <div align="center">
-  Figure 11. Bypass Boundary Scan TAP and load IDCODE Cortex-M3 TAP
+  Figure 13. Bypass Boundary Scan TAP and load IDCODE Cortex-M3 TAP
 </div> 
 
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE 3V3](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/856x152/e98a87661df4ec1e0f0da1d3aeffb6a8/SAMPLE_RESULT_1.png)  
 <div align="center">
-  Figure 12. Sample I/O connected to 3V3
+  Figure 14. Sample I/O connected to 3V3
 </div> 
 
 ![Result of SAMPLE GND](https://trello-attachments.s3.amazonaws.com/5d284f92ba3e278016d3a76d/841x150/9151bf5225d980a263544f96a4526026/SAMPLE_RESULT_0.png)  
 <div align="center">
-  Figure 13. Sample I/O connected to GND
+  Figure 15. Sample I/O connected to GND
 </div> 
 
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
@@ -376,25 +376,25 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 #### <a name="cliIDCODE"></a> **1. IDCODE**  
 ![Result of IDCODE CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/783x185/877c0c8cd5fb3f3a5245ff73d510c95e/JTAG_IDCODE.png)  
 <div align="center">
-  Figure 14. Get IDCODE of both TAP devices using CLI
+  Figure 16. Get IDCODE of both TAP devices using CLI
 </div> 
 
 #### <a name="cliBYPASS"></a> **2. BYPASS**  
 ![Result of BYPASS CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/274x62/ffeb7739552e41a7e02e77b7f6471422/JTAG_BYPASS.png)  
 <div align="center">
-  Figure 15. Bypass both TAP devices using CLI
+  Figure 17. Bypass both TAP devices using CLI
 </div> 
 
 #### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE/PRELOAD CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/570x132/60c7800e7a7b147ed61de94b7067809a/JTAG_SAMPLE.png)  
 <div align="center">
-  Figure 16. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 18. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 #### <a name="cliEXTEST"></a> **4. EXTEST**   
 ![Result of EXTEST CLI](https://trello-attachments.s3.amazonaws.com/5d5d0c847ad6f41a3d825303/227x85/eb2b5a6ef1d40dac2b03b6a08939ce9d/JTAG_EXTEST.png)  
 <div align="center">
-  Figure 17. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
+  Figure 19. Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
 ## <a name="refer"></a> References
