@@ -317,6 +317,12 @@ To sample the INPUT boundary scan cell state (0/1). The CONTROL cell are set to 
 To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 to enable the output enable. Then, the desired OUTPUT state (0/1) preloaded can be drive to the I/O pin. 
 > The first bit shifted out from TDO will be the LSB of result. The shifting of all JTAG operations is from LSB to MSB.  
 
+#### 4. Hardware schematic of this project  
+![Setup of circuit for this project](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5d556e561a60be891ce831e4/de6cc988e68239423112185afa0c5899/schematic-Paint.png)  
+<div align="center">
+  Figure 8. Schematic for JTAG Boundary Scan
+</div>  
+
 ### <a name="stm32Workbench"></a> System Workbench for STM32  
 #### <a name="wbIDCODE"></a> **1. IDCODE** 
 By referring Figure 7 and Figure 8, the expected result for both devices is `0x164100413ba00477`.  
