@@ -334,7 +334,7 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
 **1. Bypass both TAP devices**  
-![Example of BYPASS instructions](https://i.ibb.co/BsVg2Qd/ezgif-com-gif-maker.gif)  
+![Example of BYPASS instructions](https://i.ibb.co/chQPC3M/ezgif-com-gif-maker-1.gif)  
 <div align="center">
   Gif 3. Example of BYPASS instruction
 </div>   
