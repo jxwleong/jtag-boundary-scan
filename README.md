@@ -332,10 +332,9 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
   Figure 10. IDCODE for two TAP devices using IDCODE instruction
 </div>   
 
-
-
-
 #### <a name="wbBYPASS"></a> **2. BYPASS**  
+**1. Bypass both TAP devices**  
+![Result of BYPASS both TAP devices](https://trello-attachments.s3.amazonaws.com/5cee3006c401286b7627b5c5/5cefa60937c6a41272b06fe9/c3d4fb2514e62f5bc005d235655ee6c3/jtag-Bypass-Result.png)  
 #### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
 #### <a name="wbEXTEST"></a> **4. EXTEST**  
 
