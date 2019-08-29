@@ -8,7 +8,7 @@
     3. [SAMPLE/PRELOAD](#samPre)
     4. [EXTEST](#extest)
 5.  [JTAG I/O signals](#ioSig) 
-6.  [Boundary Scan Description Language(BSDL)](#bsdl)
+6.  [Boundary Scan Description Language (BSDL)](#bsdl)
     1. [What is BSDL?](#bsdlIntro)
     2. [How to read BSDL?](#bsdlHowTo)
         1. [Insturction opcode and length](#instructNLength)  
@@ -106,7 +106,7 @@ Register contents. The Capture-IR state enables access to the Instruction Regist
 This instruction is required by IEEE Standard 1149.1. This instruction connect TDI and TDO through the `Boundary scan register`.  
 Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
-![Boundary Scan Register Sample/Preload](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/gifs/Gif%201.gif)  
+![Boundary Scan Register Sample/Preload](https://github.com/jason9829/JTAG_BoundaryScan/blob/master/resources/gifs/Gif%201_new.gif)  
 
 <div align="center">
   Gif 1. Boundary Scan Register from [6.] pg 9 
