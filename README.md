@@ -57,7 +57,7 @@ JTAG is an industrial standard for testing and verifying PCB designs after fabri
   Figure 1. JTAG Register from [2.]  
 </div>  
     
-Based on Figure 1, Any JTAG devices will have at least 4 I/O pin (TCK, TMS, TDI, TDO) with TRST as optional. For the purpose of this
+Based on Figure 1, any JTAG devices will have at least 4 I/O pin (TCK, TMS, TDI, TDO) with TRST as optional. For the purpose of this
 project, only 4 I/O pins were used.  
   
 With so many data lines connected to the device, a controller unit is needed to tell the JTAG device what to do. That control unit is named
@@ -71,7 +71,7 @@ Machine](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e2495
   
 TAP Controller basiccaly is a 16 states state machine that control the behaviour of JTAG devices. This state machine is controlled by TMS 
 and TCK signals. The TMS singals will be captured on the rising edge of TCK. Depend on the current state of the TAP state machine, the JTAG
-device can transition to another state to do different operations. For exaple, if current state is `CAPTURE_DR` which capture the data from 
+device can transition to another state to do different operations. For example, if current state is `CAPTURE_DR` which capture the data from 
 `External Connections` into `Boundary Scan Register` then a pulse of high TMS and TCK was send to JTAG device. After that, current state 
 will be `SHIFT_DR` which will shift data from TDI to TDO.
 
