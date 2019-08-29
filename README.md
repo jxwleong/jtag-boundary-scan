@@ -30,7 +30,7 @@
 
 ## <a name="repoIntro"></a> What is this repo about?
 This is an project to explore JTAG Boundary Scan by using STM32F103C8T6. In this project, JTAG instructions such as BYPASS, 
-IDCODE, SAMPLE/PRELOAD will be used to test the JTAG device(s) in STM32F103C8T6.  
+IDCODE, SAMPLE/PRELOAD and EXTEST will be used to test the JTAG device(s) in STM32F103C8T6.  
 
 ## <a name="repoReq"></a> Requirements for this repo  
 **Hardware**
