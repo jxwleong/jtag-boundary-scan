@@ -6,7 +6,7 @@
 void setUp(void){}
 void tearDown(void){}
 
-/*
+
 void test_skipWhiteSpaces_given_one_blankspace_abc_expect_abd(void){
   char *str = " abc";
   skipWhiteSpaces(&str);
@@ -17,7 +17,7 @@ void test_skipWhiteSpaces_given_multiple_blankspaces_1234cd_expect_1234cd(void){
   char *str = "                 1234cd";
   skipWhiteSpaces(&str);
   TEST_ASSERT_EQUAL_STRING ("1234cd", str);
-
+}
 
 void test_bypassCharactersInStr_given_zzzzasdq_bypass_5_character_expect_sdq(void){
   char *str = "zzzzasdq";
@@ -59,8 +59,8 @@ void test_getNumberTypeInStr_given_abcd_expect_INVALID(void){
 
 void test_decimalToBinaryInStr_given_87_expect_01010111(void){
   TEST_ASSERT_EQUAL_STRING("01010111", decimalToBinaryInStr(87, 8));
-}*/
-/*
+}
+
 // 0b10101111(str) = 175(decimal)
 void test_getNumberFromStr_given_0b10101111_expect_175(void){
   char *str = "0b10101111";
@@ -76,7 +76,7 @@ void test_getNumberFromStr_given_0xffff_expect_65535(void){
 void test_getNumberFromStr_given_123456789_expect_123456789(void){
   char *str = "123456789";
   TEST_ASSERT_EQUAL(123456789, getNumberFromStr(&str));
-}*/
+}
 
 
 void test_getDataLengthFromStr_given_10_expect_10(void){

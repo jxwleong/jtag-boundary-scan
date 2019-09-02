@@ -157,7 +157,7 @@ void verifyTapSequence(TapSequence tapSeq[]){
   state, TAP state machine only travel at rising edge so
   TMS must be set before the rising edge*/
 
-/*
+
 void test_resetTapState_given_extra_seq_on_entry_5_expect_error_msg(void){
 
 
@@ -263,7 +263,7 @@ void test_resetTapState_given_correct_seq_start_from_CAPTURE_DR_expect_TAP_LOGIC
 }
 
 
-*/
+
 void test_getTapStateName_given_X_expect_Invalid_TAP_state_string(void)
 {
   TapState tapstate;
@@ -273,7 +273,7 @@ void test_getTapStateName_given_X_expect_Invalid_TAP_state_string(void)
   TEST_ASSERT_EQUAL_STRING("Invalid TAP state", tapStateName);
 
 }
-/*
+
 void test_getTmsRequired_given_TEST_LOGIC_RESET_to_RUN_TEST_IDLE_expect_tms_LOW(void){
   int expectedTms;
 
@@ -484,7 +484,7 @@ void test_tapWriteBits_given_0xf1_expect_correct(void){
   verifyTapSequence(tapSeq);
 }
 
-/*
+
 void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void){
   jtagState.state = SHIFT_IR;
   jtagState.DataReg = 0;
@@ -497,7 +497,7 @@ void test_tapWriteBits_given_0x60_in_seq_but_0x61_in_function_expect_error(void)
   {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
-  tapWriteBits(0x61, 8);
+  jtagWriteAndReadBits(0x61, 8);
 
   TEST_ASSERT_EQUAL(0x60, jtagState.DataReg);
   verifyTapSequence(tapSeq);
@@ -515,7 +515,7 @@ void test_tapReadBits_given_0xff_expect_read_0xff(void){
   {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
-  data = tapReadBits(8);
+  data = jtagWriteAndReadBits(0xff, 8);
   TEST_ASSERT_EQUAL(255, data);
   verifyTapSequence(tapSeq);
 }
@@ -532,7 +532,7 @@ void test_tapReadBits_given_wrong_state_expect_error_message(void){
   {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
-  data = tapReadBits(8);
+  data = jtagWriteAndReadBits(0xff,8);
   TEST_ASSERT_EQUAL(255, data);
   verifyTapSequence(tapSeq);
 }
@@ -555,9 +555,9 @@ void test_loadInstructionRegister_given_BYPASS_expect_instruction_written(void){
   {END, 0, 0, 1}};
 
   setupFakeTapSeq(tapSeq);
-  loadInstructionRegister(BYPASS ,5);
+  loadJtagIR(BYPASS ,5, TEST_LOGIC_RESET);
 
   TEST_ASSERT_EQUAL(0b11111, jtagState.DataReg);
   verifyTapSequence(tapSeq);
 }
-*/
+
