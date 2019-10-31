@@ -245,7 +245,7 @@ But by referring Figure 5, the actual JTAG boundary scan device IDCODE is `0x164
   Snippet 5. Device IDCODE from [9.] line 185
 </div>  
   
-Based on Snippet 5, the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 btis of data.
+Based on Snippet 5, the length of boundary scan register is 232. This means that when running `SAMPLE/PRELOAD` and `EXTEST` instructions, we need to shift in 232 bits of data. Besides, the sampling result from `SAMPLE/PRELOAD` will have to shift out 232 bits by shifting in 232 bits of data.
    
 ```vhdl
 -- The following list specifies the characteristics of each cell in the boundary scan register from 
