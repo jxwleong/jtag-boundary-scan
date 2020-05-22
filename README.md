@@ -16,7 +16,7 @@ This project explores the JTAG boundary scan by using STM32F103C8T6. JTAG instru
 5.  [Boundary Scan Description Language (BSDL)](#bsdl)
     * [What is BSDL?](#bsdlIntro)
     * [How to read BSDL?](#bsdlHowTo)
-        *  [Insturction opcode and length](#instructNLength)  
+        *  [Instruction opcode and length](#instructNLength)  
         *  [Device IDCODE](#deviceID) 
         *  [Boundary Scan Cells and Registers Informations](#bscinfo)
 6.  [Result](#result)
