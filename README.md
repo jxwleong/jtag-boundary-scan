@@ -1,4 +1,4 @@
-# JTAG Boundary Scan
+# JTAG Boundary Scan [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 This project explores the JTAG boundary scan by using STM32F103C8T6. JTAG instructions such as BYPASS, IDCODE, SAMPLE/PRELOAD and EXTEST will be usued to test the JTAG device(s) in STM32F103C8T6. Moreover, a command-line interface (CLI) was setup using Tera Term and UART in the microcontroller to ease the testing.
 
 
