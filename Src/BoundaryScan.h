@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 
+#include "global.h"
+
 // Boundary Scan MACROs
-#define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH		232
 #define BOUNDARY_SCAN_CELL_DIV_8				CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH/8
 
 typedef struct BSReg BSReg;
@@ -23,8 +24,8 @@ typedef enum{
 
 
 typedef enum{
-	OUTPUT_PIN = 0,
-	INPUT_PIN = 1,
+	OUTPUT_PIN = !DISVAL,
+	INPUT_PIN = DISVAL,
 }BSCPinMode;
 
 

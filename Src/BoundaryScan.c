@@ -8,7 +8,6 @@
 
 #include "BoundaryScan.h"
 #include "TAP.h"
-#include "global.h"
 #include "BSReg_Table.h"
 #include "myString.h"
 #include "jtagLowLevel.h"
@@ -20,7 +19,7 @@ extern TapState currentTapState;
 void bSCInIt(volatile BSCell *bSC){
 	  int i = 0;
 
-	  while(i < BOUNDARY_SCAN_CELL_DIV_8){
+	  while(i < BOUNDARY_SCAN_CELL_DIV_8 + 1){
 		  bSC->bSCellPreloadData[i] = 0x00000000;
 		  bSC->bSCellSampleData[i] = 0x00000000;
 		  i++;
@@ -37,7 +36,10 @@ void jtagWriteAndReadBSCells(volatile BSCell *bSC, int length){
 	int count = 0;
 
 	// get rid of bypass bit for CORTEX M3 TAP
-	tdoData = jtagClkIoTms(oneBitData, 0);
+	for(int x=1; x < NUMBER_OF_TAPS; x++) {
+		tdoData = jtagClkIoTms(oneBitData, 0);
+	}
+
 	// noted that last bit of data must be set at next tap state
 	for (n = length ; n > 1; n--) {
 	  oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
