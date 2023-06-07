@@ -5,37 +5,37 @@ This project explores the JTAG boundary scan by using STM32F103C8T6. JTAG instru
 <br/>
 
 ## Table of Contents
-1.  [Requirements for this repo](#repoReq)
-2.  [What is JTAG?](#jtagIntro)
-3.  [JTAG Instuctions](#jtagInstruc)
+1.  [Requirements for this repo](repo_req)
+2.  [What is JTAG?](#jtag_intro)
+3.  [JTAG Instuctions](#jtag_instruction)
     * [BYPASS](#bypass)
     * [IDCODE](#idcode)
-    * [SAMPLE/PRELOAD](#samPre)
+    * [SAMPLE/PRELOAD](#sample_preload)
     * [EXTEST](#extest)
-4.  [JTAG I/O signals](#ioSig) 
+4.  [JTAG I/O signals](#io_signal) 
 5.  [Boundary Scan Description Language (BSDL)](#bsdl)
-    * [What is BSDL?](#bsdlIntro)
-    * [How to read BSDL?](#bsdlHowTo)
-        *  [Instruction opcode and length](#instructNLength)  
-        *  [Device IDCODE](#deviceID) 
-        *  [Boundary Scan Cells and Registers Informations](#bscinfo)
+    * [What is BSDL?](#bsdl_intro)
+    * [How to read BSDL?](#bsdl_how_to)
+        *  [Instruction opcode and length](#instruction_length)  
+        *  [Device IDCODE](#device_id) 
+        *  [Boundary Scan Cells and Registers Informations](#bsc_info)
 6.  [Result](#result)
-    *  [Information required for JTAG Boundary Scan](#infoBoundaryScan)  
-    *  [Result for System Workbench for STM32](#stm32Workbench)
-        *  [IDCODE](#wbIDCODE)
-        *  [BYPASS](#wbBYPASS)
-        *  [SAMPLE/PRELOAD](#wbSAMPLE_PRELOAD)
-        *  [EXTEST](#wbEXTEST)
+    *  [Information required for JTAG Boundary Scan](#info_boundary_scan)  
+    *  [Result for System Workbench for STM32](#stm32_workbench)
+        *  [IDCODE](#wb_idcode)
+        *  [BYPASS](#wb_bypass)
+        *  [SAMPLE/PRELOAD](#wb_sample_preload)
+        *  [EXTEST](#wb_extest)
     * [Result for Command-line interface (CLI)](#cli)
-        *  [IDCODE](#cliIDCODE)
-        *  [BYPASS](#cliBYPASS)
-        *  [SAMPLE/PRELOAD](#cliSAMPLE_PRELOAD)
-        *  [EXTEST](#cliEXTEST)
-7.  [References](#refer)    
+        *  [IDCODE](#cli_idcode)
+        *  [BYPASS](#cli_bypass)
+        *  [SAMPLE/PRELOAD](#cli_sample_preload)
+        *  [EXTEST](#cli_extest)
+7.  [References](#reference)    
 
 <br/>
 
-## <a name="repoReq"></a> Requirements for this repo  
+## <a name="repo_req"></a> Requirements for this repo  
 **Hardware**
 1. STM32F103 Blue Pill/ Black Pill x 1
 2. SMT32 Smart V2.0 x 2
@@ -52,7 +52,7 @@ For the schematic of this repo, please click [here](#schematic).
 <br/>
 
 
-## <a name="jtagIntro"></a> What is JTAG?
+## <a name="jtag_intro"></a> What is JTAG?
 JTAG is an industrial standard for testing and verifying PCB designs after fabricate (Boundary Scan). Besides that, JTAG is often used as an debugger for hardware such as microcontroller like STM32F103C8T6.
   
   
@@ -85,7 +85,7 @@ will be `SHIFT_DR` which will shift data from TDI to TDO.
 
 <br />
 
-## <a name="jtagInstruc"></a>  JTAG Instructions  
+## <a name="jtag_instruction"></a>  JTAG Instructions  
 ### <a name="bypass"></a> 1.BYPASS  
 By IEEE Standard 1149.1, the instruction code for BYPASS instruction is all 0b1 (depend length of instruction register). This instruction is used to bypass device(s) that are not tested or to perform some specific region of circuit where are prompt to failure.
 By referring to Figure 1, after BYPASS instruction is loaded, TDI and TDO are connected with `Bypass Reg`. The `Bypass Reg` contain one bit of dont't care data. Thus, whenever using BYPASS instruction, there will be numbers of these dont't care data bits depend on how many bypass device(s). `bypass bits = n * 1`.
@@ -116,7 +116,7 @@ Register contents. The Capture-IR state enables access to the Instruction Regist
 
 &nbsp; 
 
-### <a name="samPre"></a> 3. SAMPLE/PRELOAD
+### <a name="sample_preload"></a> 3. SAMPLE/PRELOAD
 This instruction is required by IEEE Standard 1149.1. This instruction connect TDI and TDO through the `Boundary scan register`.  
 Thus, SAMPLE/PRELOAD instruction allows user to take a snapshot of the system I/O pins witout affecting the functionality `System logic`.
 
@@ -166,7 +166,7 @@ further `EXTEST` is desired.
   
 <br/>
   
-## <a name="ioSig"></a> JTAG I/O signals
+## <a name="io_signal"></a> JTAG I/O signals
 ![Example of JTAG waveform](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%204.png)
 <div align="center">
   Figure 4. Example of JTAG waveform from [6.] pg 25  
@@ -216,8 +216,8 @@ pads of the device are wired to external pins.
 
 <br/>
 
-### <a name="bsdlHowTo"></a> How to read BSDL?  
-#### <a name=instructNLength></a> Instruction Opcode and length
+### <a name="bdsl_how_to"></a> How to read BSDL?  
+#### <a name=instruction_length></a> Instruction Opcode and length
 ```vhdl
 -- Specifies the number of bits in the instruction register.
 
@@ -249,7 +249,7 @@ By referring the attributed on Snippet 3, the instruction length of this device 
 
 <br/>
 
-#### <a name=deviceID></a> Device IDCODE
+#### <a name=device_id></a> Device IDCODE
 ```vhdl
 -- Specifies the bit pattern that is loaded into the DEVICE_ID register during the IDCODE 
 -- instruction when the TAP controller passes through the Capture-DR state.
@@ -277,7 +277,7 @@ But by referring Figure 5, the actual JTAG boundary scan device IDCODE is `0x164
 
 <br/>
   
-#### <a name=bscinfo></a> Boundary Scan Cells and Registers Informations  
+#### <a name=bsc_info></a> Boundary Scan Cells and Registers Informations  
 ```vhdl
 -- Specifies the length of the boundary scan register.
    
@@ -324,7 +324,7 @@ Based on Snippet 5, the length of boundary scan register is 232. This means that
   
 Based on Snippet 6, for  
 **SAMPLE/PRELOAD**  
-In this case, we want to sample the current input status of pin `PC13`. Note the `disval` of cell 215. To disable the output enable, cell 215 need to set to 1. By referring Gif 1. at [here](#samPre), when `CONTROL` register is set to HIGH (1), the tri-state output will be disable. Thus, the input data of pin PC13 can be captured.  
+In this case, we want to sample the current input status of pin `PC13`. Note the `disval` of cell 215. To disable the output enable, cell 215 need to set to 1. By referring Gif 1. at [here](#sample_preload), when `CONTROL` register is set to HIGH (1), the tri-state output will be disable. Thus, the input data of pin PC13 can be captured.  
  
 **EXTEST**  
 Let say we want to set the output of pin PC13 to HIGH (1). Based on the `disval` description of control cell (215), to enable the tri-state output buffer, `CONTROL` register is set to LOW (0) so that the preloaded data at `Update Register` of `OUTPUT` can be drive to pin PC13. For more info on how `EXTEST` work, please click [here](#extest).  
@@ -338,7 +338,7 @@ There for two jtag devices in STM32F103C8T6 as shown at Figure 6. When doing JTA
 
 <br/>
 
-### <a name="infoBoundaryScan"></a> Information required for JTAG Boundary Scan 
+### <a name="info_boundary_scan"></a> Information required for JTAG Boundary Scan 
 
 #### 1. Instruction opcode for different TAP devices  
 
@@ -378,7 +378,7 @@ Based on Figure 7, the IDCODE for Boundary Scan TAP is `0x16410041` and Cortex-M
 
 &nbsp;
 
-By referring to [Boundary Scan Cells and Registers Informations](#bscinfo), we know that the length of boundary scan cell is `232` which mean that we need to shift in 232 bits via TDI. Basically, a I/O is connected to three boundary scan cells (INPUT, OUTPUT and CONTROL). Depend on which instruction used, the datat shift in for boundary scan cells are different.  
+By referring to [Boundary Scan Cells and Registers Informations](#bsc_info), we know that the length of boundary scan cell is `232` which mean that we need to shift in 232 bits via TDI. Basically, a I/O is connected to three boundary scan cells (INPUT, OUTPUT and CONTROL). Depend on which instruction used, the datat shift in for boundary scan cells are different.  
 
 <br />
 
@@ -403,8 +403,8 @@ To do EXTEST operation which set the OUTPUT cell. The CONTROL cell are set to 0 
 
 <br/>  
 
-### <a name="stm32Workbench"></a> System Workbench for STM32  
-#### <a name="wbIDCODE"></a> **1. IDCODE** 
+### <a name="stm32_workbench"></a> System Workbench for STM32  
+#### <a name="wb_idcode"></a> **1. IDCODE** 
 By referring Figure 7 and Figure 8, the expected result for both devices is `0x164100413ba00477`.   
 
 <br />
@@ -427,7 +427,7 @@ By referring Figure 7 and Figure 8, the expected result for both devices is `0x1
 &nbsp;
 &nbsp;
 
-#### <a name="wbBYPASS"></a> **2. BYPASS**  
+#### <a name="wb_bypass"></a> **2. BYPASS**  
 **1. Bypass both TAP devices**  
 ![Example of BYPASS instructions](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/gifs/Gif%203.gif)  
 <div align="center">
@@ -461,7 +461,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 &nbsp;  
 
-#### <a name="wbSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+#### <a name="wb_sample_preload"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE 3V3](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2014.png)  
 <div align="center">
   Figure 14. Sample I/O pin connected to 3V3
@@ -477,7 +477,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 &nbsp;
 
 
-#### <a name="wbEXTEST"></a> **4. EXTEST**  
+#### <a name="wb_extest"></a> **4. EXTEST**  
 <img src="https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2016.jpg" width="640">  
 <div align="center">
   Figure 16. EXTEST set the I/O pin PA9 to 1 (HIGH)
@@ -495,7 +495,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 
 ### <a name="cli"></a> Command-line interface (CLI) 
-#### <a name="cliIDCODE"></a> **1. IDCODE**  
+#### <a name="cli_idcode"></a> **1. IDCODE**  
 ![Result of IDCODE CLI](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2018.png)  
 <div align="center">
   Figure 18. Get IDCODE of both TAP devices using CLI
@@ -503,7 +503,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 &nbsp;
 
-#### <a name="cliBYPASS"></a> **2. BYPASS**  
+#### <a name="cli_bypass"></a> **2. BYPASS**  
 ![Result of BYPASS CLI](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2019.png)  
 <div align="center">
   Figure 19. Bypass both TAP devices using CLI
@@ -523,7 +523,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 &nbsp;  
 
-#### <a name="cliSAMPLE_PRELOAD"></a> **3. SAMPLE/PRELOAD**  
+#### <a name="cli_sample_preload"></a> **3. SAMPLE/PRELOAD**  
 ![Result of SAMPLE/PRELOAD CLI](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2022.png)  
 <div align="center">
   Figure 22. Sample/Preload boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
@@ -531,7 +531,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 &nbsp;
 
-#### <a name="cliEXTEST"></a> **4. EXTEST**   
+#### <a name="cli_extest"></a> **4. EXTEST**   
 ![Result of EXTEST CLI](https://github.com/jason9829/JTAG_BoundaryScan/blob/b156e726b8d3d7e24953adbeab966ed18cc00d46/resources/images/Figure%2023.png)  
 <div align="center">
   Figure 23 . Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
@@ -540,7 +540,7 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
 
 &nbsp;
 
-## <a name="refer"></a> References
+## <a name="reference"></a> References
 [1.] [JTAG - Wikipedia](https://en.wikipedia.org/wiki/JTAG)  
 [2.] [12 3 DFT2 JTAG Instruction](https://www.youtube.com/watch?v=XEN01h9qkC4)  
 [3.] [What is JTAG and how can I make use of it?](https://www.xjtag.com/about-jtag/what-is-jtag/)  
