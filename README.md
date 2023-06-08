@@ -5,7 +5,7 @@ This project explores the JTAG boundary scan by using STM32F103C8T6. JTAG instru
 <br/>
 
 ## Table of Contents
-1.  [Requirements for this repo](repo_req)
+1.  [Requirements for this repo](#repo_req)
 2.  [What is JTAG?](#jtag_intro)
 3.  [JTAG Instuctions](#jtag_instruction)
     * [BYPASS](#bypass)
