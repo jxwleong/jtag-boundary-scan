@@ -29,6 +29,9 @@ typedef enum{
 #define DUMMY_DATA			0x1234abcd
 #define CORTEX_M3_BOUNDARY_SCAN_CELL_LENGTH	232
 
+#define DISVAL				1
+#define NUMBER_OF_TAPS		2
+
 #define BUFFER_SIZE			1024
 #define BSCELL_STR_LENGTH	16
 
