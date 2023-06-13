@@ -27,8 +27,26 @@ void jtagIoInit(){
 }
 
 /*
- * Handle the TCK, TMS, TDI(data), and
- * return value read at same CLK cycle.
+ * This function is used to perform a single JTAG clock cycle, during which
+ * the Test Data Input (TDI) and Test Mode Select (TMS) are set to the desired 
+ * values. It also reads the value at the Test Data Output (TDO) during the 
+ * same clock cycle.
+ *
+ * Parameters:
+ *   - data: The value to be written to the TDI.
+ *   - tms: The value to be written to the TMS.
+ *
+ * Returns:
+ *   - val: The value read from the TDO at the end of the clock cycle.
+ *
+ * Process:
+ *   - The clock (TCK) is initially set to a low state (0).
+ *   - The TMS and TDI are then set to the input values provided (tms and data, respectively).
+ *   - The system then pauses for 500 microseconds to ensure stable signal conditions.
+ *   - The clock (TCK) is then transitioned to a high state (1), initiating a JTAG clock cycle.
+ *   - The TDO value is read and stored.
+ *   - The system pauses again for 500 microseconds to stabilize before the next operation.
+ *   - The TDO value read is then returned as the output of the function.
  */
 int jtagClkIoTms(int data, int tms){
 	int val = 0;

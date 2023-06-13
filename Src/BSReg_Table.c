@@ -14,6 +14,12 @@
 
 extern char tempBuffer[BUFFER_SIZE];
 
+/*
+ * This array of BSReg structures defines a lookup table for the different boundary scan registers (BSReg) in the system. 
+ * The array is indexed by an enumeration value representing each boundary scan register. 
+ * Each element of the array is a BSReg structure, which holds information about a specific boundary scan register,
+ * such as its input, output, and control cell numbers, and its pin name.
+ */
 BSReg	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 		// GPIO_A
 		[PA0] = {.inputCellNum = 187, .outputCellNum =  188, .controlCellNum = 189, .pinName = "pa0"},
@@ -59,6 +65,18 @@ BSReg	bSRegTable[NO_OF_BOUNDARY_SCAN_REG] = {
 
 };
 
+
+/*
+ * This function returns a BSReg object from the lookup table based on a string input. 
+ * It first skips any whitespace in the input string, then checks each element of the lookup table to see if 
+ * the pinName matches with the input string.
+ *
+ * Parameters:
+ *   - *str: A string that needs to be matched with a pinName in the lookup table.
+ *
+ * Returns:
+ *   - A BSReg object fetched from the lookup table based on the input string.
+ */
 BSReg getBSRegFromTable(char *str){
 	skipWhiteSpaces(&str);
 	for(int i = 0; i<NO_OF_BOUNDARY_SCAN_REG;i++){
@@ -68,6 +86,20 @@ BSReg getBSRegFromTable(char *str){
 	}
 }
 
+
+/*
+ * This function checks if a given string is a valid boundary scan register. 
+ * It first skips any whitespace in the input string, then checks each element of the lookup table to see if 
+ * the pinName matches with the input string. If a match is found, the function returns 1, 
+ * otherwise, it writes an error message to the temporary buffer and returns 0.
+ *
+ * Parameters:
+ *   - *str: A string that needs to be validated as a pinName in the lookup table.
+ *
+ * Returns:
+ *   - 1 if the input string is a valid pinName in the lookup table.
+ *   - 0 if the input string is not a valid pinName in the lookup table.
+ */
 int isBSRegValid(char *str){
 	skipWhiteSpaces(&str);
 	for(int i = 0; i<NO_OF_BOUNDARY_SCAN_REG;i++){
