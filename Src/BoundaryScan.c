@@ -89,24 +89,41 @@ void jtagWriteAndReadBSCells(volatile BSCell *bSC, int length){
 	int n = 0;
 	int count = 0;
 
-	// get rid of bypass bit for CORTEX M3 TAP
+	// Get rid of bypass bit for CORTEX M3 TAP. This bit is 
+    // the first bit to be shifted out during JTAG operations.
 	tdoData = jtagClkIoTms(oneBitData, 0);
-	// noted that last bit of data must be set at next tap state
+
+
+	// Note that the last bit of data must be set at next tap state.
+	// The loop will shift in all but the last bit of the boundary 
+    // scan data. 
 	for (n = length ; n > 1; n--) {
+		// Extract the bit to be shifted in	
 	  oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
+
+	   // Extract the bit to be shifted in
 	  tdoData = jtagClkIoTms(oneBitData, 0);
+
+	  // Store the output data into the sampled data array. 
+	  // DIV by 8 is used to get the index for uint8_t array
 	  currentTapState = updateTapState(currentTapState, 0);
-	  // DIV by 8 to get the index for uint8_t array
+	  // Update the current TAP state
 	  (bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);;
+
+	   // Shift the remaining data to the right
 	  (bSC->bSCellPreloadData[count/8]) = bSC->bSCellPreloadData[count/8] >> 1;
 	  i++;
 		if(i%8 == 0)
 			i = 0;
 	  count++;
 	}
+
+	// For the last bit of data, transition to EXIT1_DR state (TMS=1)
 	oneBitData = dataMask & bSC->bSCellPreloadData[count/8];
 	tdoData = jtagClkIoTms(oneBitData, 1);
 	currentTapState = updateTapState(currentTapState, 1);
+
+	// Store the final output bit
 	(bSC->bSCellSampleData[count/8]) |= tdoData << (i*1);
 }
 
