@@ -91,7 +91,24 @@ void jtagWriteTms(uint64_t data, int length){
   }
 }
 
+/*
+Refer to B5.2.3 Switching from SWD to JTAG operation of https://developer.arm.com/documentation/ihi0031/latest/
 
+To switch SWJ-DP from SWD to JTAG operation:
+	1. Send at least 50 SWCLKTCK cycles with SWDIOTMS HIGH. This sequence ensures that the current 
+		interface is in its reset state. The SWD interface only detects the 16-bit SWD-to-JTAG sequence when it is 
+		in the reset state.
+	2. Send the 16-bit SWD-to-JTAG select sequence on SWDIOTMS.
+	3. Send at least five SWCLKTCK cycles with SWDIOTMS HIGH. This sequence ensures that if SWJ-DP 
+		was already in JTAG operation before sending the select sequence, the JTAG TAP enters the 
+		Test-Logic-Reset state.
+		
+The 16-bit SWD-to-JTAG select sequence is 0b0011 1100 1110 0111, MSB first. This sequence can be represented as 
+either of the following:
+• 0x3CE7, transmitted MSB first
+• 0xE73C, transmitted LSB first.
+
+*/
 void switchSwdToJtagMode(){
 	jtagWriteTms(0x3FFFFFFFFFFFF, 50);
 	jtagWriteTms(0xE73C, 16);

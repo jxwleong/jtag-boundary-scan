@@ -12,26 +12,53 @@ char tempBuffer[BUFFER_SIZE] = {0};
 volatile BSCell bsc1;
 
 
+/* This function configures the USART peripheral for a desired baud rate and mode.
+ *
+ * Parameters:
+ *   - *usart: A pointer to the USART register structure. This will be used to modify the USART's settings.
+ *   - mode: A 64-bit value where each bit represents a different setting or feature for the USART.
+ *   - desiredBaudrate: The desired communication speed in baud (symbols per second).
+ *   - peripheralFreq: The frequency at which the USART's clock is running.
+ */
 void usartConfigure(USARTRegs *usart, long long mode, int desiredBaudrate, int peripheralFreq){
 	int mantissa, fractional;
 	float divider;
 	int shiftFrac = 8;
 	int over8 = 1;
 
+	/* Mode configuration: split the 64-bit mode variable into 4 16-bit parts and assign them 
+     * to the USART's control registers (CR1, CR2, CR3). These control registers can enable/disable
+     * various USART features and settings.
+     */
 	usart->CR1 = (uint32_t)(mode & 0xffff);
 	usart->CR2 = (uint32_t)((mode >>16)& 0xffff);
 	usart->CR3 = (uint32_t)(mode >> 32);
 
-
+   /* Set the BRR with the calculated mantissa and fractional values. The BRR determines the
+     * USART's baud rate.
+     */
 	if(usartOverSample16(usart)){
 		shiftFrac = 16;
 		over8 = 0;
 	}
 
+	/* Calculate the mantissa and fractional parts of the USART's baud rate register (BRR). 
+     * These are calculated based on the peripheral frequency, the desired baud rate, and whether
+     * we are oversampling by 8 or 16.
+	 * 
+	 * In the context of a USART (Universal Synchronous/Asynchronous Receiver/Transmitter), 
+	 * oversampling by 8 or 16 refers to the number of times the USART samples the state of a received bit to determine whether it is a '0' or a '1'.
+
+		For instance, in "oversample by 16" mode, the USART module will sample the state of a received bit 16 times. Then, it typically uses a majority voting system to determine the value of the bit. This can help improve the reliability of data reception, especially in noisy environments.
+     */
+
 	divider = ((float)peripheralFreq/ (8 * ((2 - over8) * desiredBaudrate)));
 	mantissa = (int) divider;
 	fractional = (int)((float)(divider - mantissa) * shiftFrac);
 
+	/* Set the BRR with the calculated mantissa and fractional values. The BRR determines the
+     * USART's baud rate.
+     */
 	usart->BRR = (mantissa << 4)	| (fractional);
 
 }
