@@ -230,25 +230,42 @@ int main(void)
   while (1)
   {
 
-	  restart:
-	  		  if(usartIsRxRegNotEmpty(uart1)){
-	  			  commandBuffer[i] = (uart1)->DR;
-	  			  if(usartIsTxRegEmpty(uart1)){
-	  				  (uart1)->DR = commandBuffer[i];
-	  			  }
-	  			  if(commandBuffer[i] == '\b'){
-	  				  // check for backspace
-	  				  i--;
-	  				  goto restart;
-	  			  }
-	  			  if(commandBuffer[i] == '\n'){
-	  				  commandBuffer[i] = '\0';
-	  				  commandLineOperation(commandBuffer);
-	  				  i = 0;
-	  				  goto restart;
-	  			  }
-	  			  i++;
-	  	  }
+	  restart: // Label for goto statement
+    // Check if there is new data received via UART
+    if(usartIsRxRegNotEmpty(uart1)){
+      // If data is received, read it into the commandBuffer
+      commandBuffer[i] = (uart1)->DR;
+      
+      // Check if the UART is ready to transmit data
+      if(usartIsTxRegEmpty(uart1)){
+        // If ready, echo the received data back to the sender
+        (uart1)->DR = commandBuffer[i];
+      }
+      
+      // Check if the received data is a backspace character
+      if(commandBuffer[i] == '\b'){
+        // If it is, "erase" the last character received by decrementing the index
+        i--;
+        // Then, restart the loop from the beginning
+        goto restart;
+      }
+      
+      // Check if the received data is a newline character
+      if(commandBuffer[i] == '\n'){
+        // If it is, terminate the command string and process the command
+        commandBuffer[i] = '\0';
+        commandLineOperation(commandBuffer);
+        
+        // Reset the index to start a new command
+        i = 0;
+        
+        // Then, restart the loop from the beginning
+        goto restart;
+      }
+      
+      // If the received data is neither backspace nor newline, increment the index for the next character
+      i++;
+    }
 	  //uartTransmitAndReceive(uart1, commandBuffer);
   /* USER CODE END WHILE */
 
