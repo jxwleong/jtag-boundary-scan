@@ -37,6 +37,7 @@ This project explores the JTAG boundary scan by using STM32F103C8T6. JTAG instru
       - [ **2. BYPASS**](#-2-bypass-1)
       - [ **3. SAMPLE/PRELOAD**](#-3-samplepreload-2)
       - [ **4. EXTEST**](#-4-extest-2)
+  - [ Future Enhancement](#-future-enhancement)
   - [ References](#-references)
 
 <br/>
@@ -543,6 +544,12 @@ The result shown at Figure 11 was get by shift in `0b11110011` with shifting len
   Figure 23 . Eextest boundary scan TAP device using CLI (Cortex-M3 TAP bypassed)
 </div> 
 
+
+&nbsp;
+## <a name="future-enhancement"></a> Future Enhancement
+1. **Expansion to Full Boundary Scan Testing**: The current JTAG boundary scan project is limited to preload and extest operations on specific pins. This method, although it serves for targeted testing, does not fully leverage the capabilities of boundary scan testing. A significant future enhancement could include a comprehensive test of all boundary scan cells. This expansion would ensure more robust and complete testing coverage, allowing for thorough examination of all device pins and a more efficient detection and diagnosis of potential issues across all boundary scan cells.
+
+2. **Automated Test Generation and Execution**: Manual generation and execution of tests can be time-consuming and prone to errors. Enhancing the project to automate the generation of test vectors and their execution could drastically improve this process. Implementing or integrating a software tool to automate these steps would speed up the testing process and make it more reliable and efficient.
 
 &nbsp;
 
